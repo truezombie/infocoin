@@ -1,9 +1,5 @@
-## Getting Started
-
-First, run the development server:
+### 🖥️ Run
 
 ```bash
-npm run dev
-# or
-yarn dev
+docker-compose up
 ```

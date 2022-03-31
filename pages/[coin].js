@@ -1,8 +1,7 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect, useCallback } from 'react';
 
-import { getButtonClasses } from '../utils/styles/button';
-import { Loader, ModalWindow, ModalWindowBodyCreateOrder } from '../components';
+import { Loader, ModalWindow, ModalWindowBodyCreateOrder, ModalWindowBodyBuyCoins, Button } from '../components';
 
 export default function Coin() {
   const [transactions, setTransaction] = useState([]);
@@ -11,6 +10,7 @@ export default function Coin() {
     isOpen: false,
     data: null,
   });
+  const [buyTokensModalWindowIsOpen, setBuyTokensModalWindowIsOpen] = useState(false);
   const router = useRouter();
   const { coin } = router.query;
 
@@ -47,14 +47,26 @@ export default function Coin() {
 
   }, []);
 
+  const onApplyBuyTokensModalWindow = useCallback(() => {
 
-  console.log(createOrderModalWindowIsOpen);
+  }, []);
+
+  const onCloseBuyTokensModalWindow = useCallback(() => {
+    setBuyTokensModalWindowIsOpen(false);
+  }, [])
 
   return (
     <>
       <main className="flex flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen">
-        <div className="items-baseline justify-between py-6">
-          <h1 className="text-5xl font-extrabold tracking-tight text-gray-900">Infocoin</h1>
+        <div className="flex flex-row items-baseline justify-between py-6">
+          <div>
+            <h1 className="text-5xl font-extrabold tracking-tight text-gray-900">Infocoin</h1>
+          </div>
+          <div className="sm:pr-3 lg:pr-4">
+            <Button intent="success" onClick={() => setBuyTokensModalWindowIsOpen(true)}>
+              Buy {coin}
+            </Button>
+          </div>
         </div>
         {
           transactionsIsLoading ? (
@@ -81,7 +93,7 @@ export default function Coin() {
                   transactions.length !== 0 ? transactions.map((transaction) => {
                     return (
                       <tr key={transaction.myTrade.id}>
-                        <td className='sm:px-3 lg:px-4 sm:py-3 lg:py-4 border-b text-xs font-bold'>{transaction.myTrade.commissionAsset}/USDT</td>
+                        <td className='sm:px-3 lg:px-4 sm:py-3 lg:py-4 border-b text-xs font-bold'>{transaction.myTrade.commissionAsset}</td>
                         <td className='sm:px-3 lg:px-4 sm:py-3 lg:py-4 border-b text-xs font-bold'>{getDateFromTimestamp(transaction.myTrade.time)}</td>
                         <td className='sm:px-3 lg:px-4 sm:py-3 lg:py-4 border-b text-xs font-bold'>{transaction.myTrade.qty}</td>
                         <td className='sm:px-3 lg:px-4 sm:py-3 lg:py-4 border-b text-xs font-bold'>{transaction.myTrade.quoteQty}</td>
@@ -93,16 +105,16 @@ export default function Coin() {
                         <td className='sm:px-3 lg:px-4 sm:py-3 lg:py-4 border-b text-xs font-bold'>
                           -
                         </td>
-                        <td className='sm:px-3 lg:px-4 sm:py-3 lg:py-4 border-b text-xs font-bold'>
-                          <button
+                        <td className='sm:px-3 lg:px-4 sm:py-3 lg:py-4 border-b text-xs text-right font-bold'>
+                          <Button
                             onClick={() => setCreateOrderModalWindowIsOpen({
                               isOpen: true,
                               data: transaction,
                             })}
-                            className={getButtonClasses('primary')}
+                            intent="primary"
                           >
                             Create order
-                          </button>
+                          </Button>
                         </td>
                       </tr>
                     )
@@ -119,7 +131,6 @@ export default function Coin() {
       </main>
       <ModalWindow
         isOpen={createOrderModalWindowIsOpen.isOpen}
-        onApply={onApplyCreateOrderModalWindow}
         msgTitle="Create order"
       >
         <ModalWindowBodyCreateOrder
@@ -129,6 +140,19 @@ export default function Coin() {
           msgBtnClose="Close"
           msgBtnApply="Create order"
           onClose={onCloseCreateOrderModalWindow}
+          onApply={onApplyCreateOrderModalWindow}
+        />
+      </ModalWindow>
+      <ModalWindow
+        isOpen={buyTokensModalWindowIsOpen}
+        msgTitle={`Buy ${coin}`}
+      >
+        <ModalWindowBodyBuyCoins
+          coin={coin}
+          msgBtnClose="Close"
+          msgBtnApply="Buy coins"
+          onClose={onCloseBuyTokensModalWindow}
+          onApply={onApplyBuyTokensModalWindow}
         />
       </ModalWindow>
     </>

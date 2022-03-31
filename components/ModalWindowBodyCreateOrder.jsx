@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import PropTypes from 'prop-types';
 
-import { getButtonClasses } from '../utils/styles/button';
+import { Button } from './Button';
 
 export const ModalWindowBodyCreateOrder = ({
   oneCoinPrice,
@@ -41,7 +41,7 @@ export const ModalWindowBodyCreateOrder = ({
         </div>
         <div>
           <input
-            className="border rounded-md p-2 mr-2 text-xs font-bold"
+            className="border-2 rounded-md p-2 mr-2 text-xs font-bold"
             type="number"
             min={0}
             max={1000}
@@ -81,18 +81,19 @@ export const ModalWindowBodyCreateOrder = ({
         </tbody>
       </table>
       <div className="text-right sm:pt-3 lg:pt-4">
-        <button 
-          className={getButtonClasses('default')}
+        <Button 
+          intent="default"
           onClick={onClose}
         >
           {msgBtnClose}
-        </button>
-        <button 
-          className={`ml-4 ${getButtonClasses('primary')}`}
+        </Button>
+        <Button 
+          intent="primary"
+          className="ml-4"
           onClick={onApply}
         >
           {msgBtnApply}
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -100,6 +101,7 @@ export const ModalWindowBodyCreateOrder = ({
 
 ModalWindowBodyCreateOrder.propTypes = {
   onClose: PropTypes.func,
+  onApply: PropTypes.func,
   orderPrice: PropTypes.number.isRequired,
   oneCoinPrice: PropTypes.number.isRequired,
   orderCommission: PropTypes.number.isRequired,

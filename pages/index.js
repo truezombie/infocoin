@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link'
 import { useEffect, useState } from 'react';
 import { Loader } from '../components'
-import styles from '../styles/Home.module.css'
+// import styles from '../styles/Home.module.css'
 
 export default function Home() {
   const [userCoins, setUserCoins] = useState([]);
