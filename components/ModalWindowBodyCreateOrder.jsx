@@ -55,7 +55,7 @@ export const ModalWindowBodyCreateOrder = ({
           <p className="text-right">Will earn in dollars:</p>
         </div>
         <div>
-          <p>{willEarnMoney}$</p>
+          <p>{willEarnMoney} $</p>
         </div>
       </div>
 

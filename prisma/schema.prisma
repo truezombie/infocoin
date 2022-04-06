@@ -1,11 +1,62 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DB_URL")
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  coin       String
+  status     OrderStatus @default(BUY_IN_PROGRESS)
+  orderParts OrderPart[]
+}
+
+model OrderPart {
+  id              String          @id @default(cuid())
+  symbol          String
+  clientOrderId   String
+  transactTime    Int
+  fullPrice       Float
+  coinsAmount     Float
+  oneCoinPrice    Float
+  status          OrderPartStatus @default(NEW)
+  type            OrderType       @default(MARKET)
+  side            OrderSide       @default(SELL)
+  order           Order?          @relation(fields: [orderId], references: [id])
+  orderId         String
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum OrderType {
+  LIMIT
+  MARKET
+  STOP_LOSS
+  STOP_LOSS_LIMIT
+  TAKE_PROFIT
+  TAKE_PROFIT_LIMIT
+  LIMIT_MAKER
+}
+
+enum OrderStatus {
+  BUY_IN_PROGRESS
+  BUY_DONE
+  SELL_IN_PROGRESS
+  SELL_DONE
+}
+
+enum OrderPartStatus {
+  NEW
+  PARTIALLY_FILLED
+  FILLED
+  CANCELED
+  PENDING_CANCEL
+  REJECTED
+  EXPIRED
 }
