@@ -39,7 +39,7 @@ export default function Home() {
       </Head>
 
       <main className='flex flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen'>
-        <div className='flex flex-row items-center justify-between py-6'>
+        <div className='flex flex-row items-end justify-between py-4'>
           <div>
             <h1 className='text-5xl font-extrabold tracking-tight text-gray-900'>
               Infocoin
@@ -62,7 +62,7 @@ export default function Home() {
         ) : null}
 
         {!userCoinsIsLoading && userCoins.length !== 0 ? (
-          <div className='grid grid-cols-4 gap-8'>
+          <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
             {userCoins.map((userCoin) => {
               return (
                 <div
@@ -70,13 +70,13 @@ export default function Home() {
                   className='py-4 px-4 text-center bg-white rounded-md duration-300 hover:shadow-md shadow-sm border relative'
                 >
                   <p className='text-xl font-extrabold'>{userCoin.coin}</p>
-                  <p className='text-xs  text-slate-400'>
+                  <p className='text-xs text-slate-400'>
                     {userCoin.fullCoinName}
                   </p>
                   <p className='text-1xl font-extrabold mb-4 mt-4'>
                     {userCoin.amount}
                   </p>
-                  <span className='flex h-3 w-3 absolute sm:right-3 lg:right-4 sm:top-3 lg:top-4'>
+                  <span className='flex h-3 w-3 absolute right-4 top-4'>
                     <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'></span>
                     <span className='relative inline-flex rounded-full h-3 w-3 bg-green-500'></span>
                   </span>

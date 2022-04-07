@@ -51,7 +51,7 @@ export default function Coin() {
   return (
     <>
       <main className='flex flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen'>
-        <div className='flex flex-row items-center justify-between py-6'>
+        <div className='flex flex-row items-end justify-between py-4'>
           <div>
             <h1 className='text-5xl font-extrabold tracking-tight text-gray-900'>
               Infocoin

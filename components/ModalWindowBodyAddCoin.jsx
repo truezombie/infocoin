@@ -62,7 +62,7 @@ export const ModalWindowBodyAddCoin = ({
           />
         ) : null
       }
-      <div className="grid grid-cols-2 gap-3 text-xs font-bold">
+      <div className="grid grid-cols-2 gap-4 mb-4 text-xs font-bold">
         <div className='flex justify-end items-center'>
           <p className='text-right'>Coin:</p>
         </div>
@@ -74,7 +74,7 @@ export const ModalWindowBodyAddCoin = ({
           />
         </div>
       </div>
-      <div className="text-right sm:pt-3 lg:pt-4">
+      <div className="text-right">
         <Button 
           intent="default"
           onClick={onClose}

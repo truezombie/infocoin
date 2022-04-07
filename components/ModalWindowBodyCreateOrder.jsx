@@ -80,7 +80,7 @@ export const ModalWindowBodyCreateOrder = ({
           </tr>
         </tbody>
       </table>
-      <div className="text-right sm:pt-3 lg:pt-4">
+      <div className="text-right">
         <Button 
           intent="default"
           onClick={onClose}

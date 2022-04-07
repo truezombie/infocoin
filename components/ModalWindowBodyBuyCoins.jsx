@@ -98,7 +98,7 @@ export const ModalWindowBodyBuyCoins = ({
       }
 
       {isLoading ? <Loader /> : (
-        <div className="grid grid-cols-2 gap-3 sm:pb-3 lg:pb-4 text-xs font-bold">
+        <div className="grid grid-cols-2 gap-4 text-xs font-bold">
           <div className="flex justify-end items-center">
             <p className="text-right">One {coin} price:</p>
           </div>
@@ -119,11 +119,11 @@ export const ModalWindowBodyBuyCoins = ({
           <div>
             <input
               onChange={onChangeSpendMoneyInDollars}
-              className="border-2 rounded-md p-2 mr-2 text-xs font-bold"
+              className="border-2 w-28 rounded-md p-2 text-xs font-bold"
               value={spendMoneyInDollars}
               type="number"
             />
-            $
+            &nbsp;$
           </div>
 
           <div className='flex justify-end items-center'>
@@ -132,7 +132,7 @@ export const ModalWindowBodyBuyCoins = ({
           <div>
             <input
               onChange={onChangeCoinsAmount}
-              className="border-2 rounded-md p-2 mr-2 text-xs font-bold"
+              className="border-2 w-28 rounded-md p-2 text-xs font-bold"
               value={wantBuyCoinsAmount}
               type="number"
             />
@@ -158,20 +158,20 @@ export const ModalWindowBodyBuyCoins = ({
               <div>
                 <input
                   onChange={onChangeLimitOrderOneCoinCost}
-                  className="border-2 rounded-md p-2 mr-2 text-xs font-bold"
+                  className="border-2 w-28 rounded-md p-2 text-xs font-bold"
                   value={oneCoinPriceForLimitOrder}
                   type="number"
                   min={0}
                   max={Number(buyCoinsData?.currentCoin.price)}
                 />
-                $
+                &nbsp;$
               </div>
             </>
           ) : null
         }
         </div>)}
 
-      <div className="text-right sm:pt-3 lg:pt-4">
+      <div className="text-right pt-4">
         <Button 
           intent="default"
           onClick={onClose}
