@@ -1,15 +1,7 @@
-import { getTimestamp, getSignature, getHeaders } from '../../utils/api';
+import prisma from '../../lib/prisma';
 
 export default async function handler(req, res) {
-  const timestamp = getTimestamp();
-  const query = `timestamp=${timestamp}`
-  const signature = getSignature(query);
+  const coins = await prisma.coin.findMany();
 
-  fetch(`https://api.binance.com/sapi/v1/capital/config/getall?${query}&signature=${signature}`, getHeaders())
-    .then(response => response.json())
-    .then(data => {
-      const filteredCoins = data.filter(({ free }) => Number(free) !== 0);
-
-      res.status(200).json(filteredCoins)
-  });
+  res.status(200).json(coins)
 }

@@ -16,7 +16,7 @@ async function getBinanceCreatedUserOrder(orderId) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    res.status(405).send({ message: 'Only POST requests allowed' })
+    res.status(405).send(new ApiError(405, 'Only POST requests allowed'));
     return
   }
 
@@ -73,7 +73,6 @@ export default async function handler(req, res) {
       data: order
     })
   } catch(e) {
-    console.log(e);
     res.status(500).json(new ApiError());
   }
 }

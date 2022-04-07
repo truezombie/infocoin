@@ -2,62 +2,47 @@ import { useRouter } from 'next/router';
 import { useState, useEffect, useCallback, Fragment } from 'react';
 
 import {
-  Loader,
+  FullBlockLoader,
   ModalWindow,
-  ModalWindowBodyCreateOrder,
+  // ModalWindowBodyCreateOrder,
   ModalWindowBodyBuyCoins,
+  FullBlockMessage,
   Button,
 } from '../components';
+import { getDateFromTimestamp } from '../utils/time';
 
 export default function Coin() {
-  const [transactions, setTransaction] = useState([]);
+  const [coinData, setCoinData] = useState(null);
   const [transactionsIsLoading, setTransactionsIsLoading] = useState(true);
-  const [createOrderModalWindowIsOpen, setCreateOrderModalWindowIsOpen] =
-    useState({
-      isOpen: false,
-      data: null,
-    });
+  // const [createOrderModalWindowIsOpen, setCreateOrderModalWindowIsOpen] =
+  //   useState({
+  //     isOpen: false,
+  //     data: null,
+  //   });
   const [buyTokensModalWindowIsOpen, setBuyTokensModalWindowIsOpen] =
     useState(false);
   const router = useRouter();
-  const { coin } = router.query;
+  const { coinId } = router.query;
 
   useEffect(() => {
-    if (coin) {
-      fetch(`/api/${coin}`)
+    if (coinId) {
+      fetch(`/api/${coinId}`)
         .then((response) => response.json())
         .then((data) => {
-          if (data && data.length) {
-            setTransaction(data);
-          }
+          setCoinData(data);
         })
         .finally(() => setTransactionsIsLoading(false));
     }
-  }, [coin]);
+  }, [coinId]);
 
-  const getDateFromTimestamp = (timestamp) => {
-    const today = new Date(timestamp);
+  // const onCloseCreateOrderModalWindow = useCallback(() => {
+  //   setCreateOrderModalWindowIsOpen({
+  //     isOpen: false,
+  //     data: null,
+  //   });
+  // }, []);
 
-    const date =
-      today.getFullYear() +
-      '-' +
-      (today.getMonth() + 1) +
-      '-' +
-      today.getDate();
-    const time =
-      today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-
-    return `${date} ${time}`;
-  };
-
-  const onCloseCreateOrderModalWindow = useCallback(() => {
-    setCreateOrderModalWindowIsOpen({
-      isOpen: false,
-      data: null,
-    });
-  }, []);
-
-  const onApplyCreateOrderModalWindow = useCallback(() => {}, []);
+  // const onApplyCreateOrderModalWindow = useCallback(() => {}, []);
 
   const onCloseBuyTokensModalWindow = useCallback(() => {
     setBuyTokensModalWindowIsOpen(false);
@@ -66,7 +51,7 @@ export default function Coin() {
   return (
     <>
       <main className='flex flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen'>
-        <div className='flex flex-row items-baseline justify-between py-6'>
+        <div className='flex flex-row items-center justify-between py-6'>
           <div>
             <h1 className='text-5xl font-extrabold tracking-tight text-gray-900'>
               Infocoin
@@ -77,24 +62,18 @@ export default function Coin() {
               intent='primary'
               onClick={() => setBuyTokensModalWindowIsOpen(true)}
             >
-              Buy {coin}
+              Buy {coinData?.coin}
             </Button>
           </div>
         </div>
 
-        {transactionsIsLoading ? (
-          <div className='flex h-50 items-center justify-center w-full h-full grow'>
-            <Loader />
-          </div>
+        {transactionsIsLoading ? <FullBlockLoader /> : null}
+
+        {!transactionsIsLoading && (!coinData || coinData?.orders.length === 0) ? (
+          <FullBlockMessage text='No data found' />
         ) : null}
 
-        {!transactionsIsLoading && transactions.length === 0 ? (
-          <div className='flex h-50 items-center justify-center w-full h-full grow'>
-            <p className='font-extrabold text-xl'>No data found</p>
-          </div>
-        ) : null}
-
-        {!transactionsIsLoading && transactions.length !== 0 ? (
+        {!transactionsIsLoading && coinData && coinData?.orders.length !== 0 ? (
           <table className='table-auto'>
             <thead>
               <tr>
@@ -105,13 +84,13 @@ export default function Coin() {
                   Data
                 </th>
                 <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
-                  {coin} amount
+                  {coinData?.coin} amount
                 </th>
                 <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
                   Price $
                 </th>
                 <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
-                  Price for 1 {coin}
+                  Price for 1 {coinData?.coin}
                 </th>
                 <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
                   Status
@@ -127,7 +106,7 @@ export default function Coin() {
             </thead>
 
             <tbody>
-              {transactions.map((transaction, transactionIndex) => (
+              {coinData?.orders.map((transaction, transactionIndex) => (
                 <Fragment key={transaction.id}>
                   {transaction?.orderParts.length !== 0
                     ? transaction?.orderParts.map((orderPart, index) => {
@@ -182,7 +161,7 @@ export default function Coin() {
           </table>
         ) : null}
       </main>
-      <ModalWindow
+      {/* <ModalWindow
         isOpen={createOrderModalWindowIsOpen.isOpen}
         msgTitle='Create order'
       >
@@ -201,10 +180,10 @@ export default function Coin() {
           onClose={onCloseCreateOrderModalWindow}
           onApply={onApplyCreateOrderModalWindow}
         />
-      </ModalWindow>
-      <ModalWindow isOpen={buyTokensModalWindowIsOpen} msgTitle={`Buy ${coin}`}>
+      </ModalWindow> */}
+      <ModalWindow isOpen={buyTokensModalWindowIsOpen} msgTitle={`Buy ${coinData?.coin}`}>
         <ModalWindowBodyBuyCoins
-          coin={coin}
+          coin={coinData?.coin}
           msgBtnClose='Close'
           msgBtnApply='Buy coins'
           onClose={onCloseBuyTokensModalWindow}
