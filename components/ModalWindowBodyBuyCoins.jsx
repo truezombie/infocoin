@@ -5,55 +5,84 @@ import { Button } from './Button';
 import { Loader } from './Loader';
 import { Alert } from './Alert';
 import { orderSides, orderTypes } from '../utils/constants';
+import { useRequestManager } from '../hooks/useResponseChecker';
 
 export const ModalWindowBodyBuyCoins = ({
   coin,
   onClose,
+  onLoadOrders,
   msgBtnApply,
   msgBtnClose,
 }) => {
+  const {
+    data: buyTokensData,
+    error: buyTokensError,
+    setError: setBuyTokensError,
+    onCheckResponse: onCheckBuyTokensResponse,
+  } = useRequestManager();
+  const {
+    data: coinData,
+    error: coinError,
+    setError: setCoinError,
+    onCheckResponse: onCheckCoinResponse,
+  } = useRequestManager();
+
   const [spendMoneyInDollars, setSpendMoneyInDollars] = useState(0);
   const [wantBuyCoinsAmount, setWantBuyCoinsAmount] = useState(0);
   const [oneCoinPriceForLimitOrder, setOneCoinPriceForLimitOrder] = useState(0);
   const [isLimitOrder, setIsLimitOrder] = useState(false);
 
-  const [buyCoinsData, setBuyCoinsData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOrderCreating, setIsOrderCreating] = useState(false);
-  const [error, setError] = useState(null);
 
   const onChangeSpendMoneyInDollars = (e) => {
     const value = Number(e.target.value);
     setSpendMoneyInDollars(value);
-    setWantBuyCoinsAmount(value / (isLimitOrder ? oneCoinPriceForLimitOrder : Number(buyCoinsData?.currentCoin.price)));
-  }
+    setWantBuyCoinsAmount(
+      value /
+        (isLimitOrder ? oneCoinPriceForLimitOrder : coinData?.oneCoinPrice)
+    );
+  };
 
   const onChangeLimitOrderOneCoinCost = (e) => {
-    const value = Number(e.target.value); 
+    const value = Number(e.target.value);
     setOneCoinPriceForLimitOrder(value);
-    setSpendMoneyInDollars(value * wantBuyCoinsAmount);
-  }
+    setSpendMoneyInDollars(Number(value * wantBuyCoinsAmount).toFixed(2));
+  };
 
   const onChangeCoinsAmount = (e) => {
     const value = Number(e.target.value);
     setWantBuyCoinsAmount(value);
-    setSpendMoneyInDollars(isLimitOrder ? value * oneCoinPriceForLimitOrder : value * Number(buyCoinsData?.currentCoin.price))
-  }
+    setSpendMoneyInDollars(
+      Number(
+        isLimitOrder
+          ? value * oneCoinPriceForLimitOrder
+          : value * coinData?.oneCoinPrice
+      ).toFixed(2)
+    );
+  };
 
   const onChangeIsLimitOrder = () => {
     const turnIsLimitOrder = !isLimitOrder;
     setIsLimitOrder(turnIsLimitOrder);
-    setSpendMoneyInDollars(turnIsLimitOrder ? wantBuyCoinsAmount * oneCoinPriceForLimitOrder : wantBuyCoinsAmount * Number(buyCoinsData?.currentCoin.price));
-  }
+    setSpendMoneyInDollars(
+      Number(
+        turnIsLimitOrder
+          ? wantBuyCoinsAmount * oneCoinPriceForLimitOrder
+          : wantBuyCoinsAmount * coinData?.oneCoinPrice
+      ).toFixed(2)
+    );
+  };
 
   useEffect(() => {
     fetch(`/api/buyCoinsData/${coin}`)
-    .then(response => response.json())
-    .then((data) => {
-      setOneCoinPriceForLimitOrder(Number(data.currentCoin.price));
-      setBuyCoinsData(data);
-    })
-    .finally(() => setIsLoading(false))
+      .then((response) => response.json())
+      .then((response) => {
+        onCheckCoinResponse(response);
+        // setOneCoinPriceForLimitOrder(Number(data.currentCoin.price));
+        // setBuyCoinsData(data);
+      })
+      .finally(() => setIsLoading(false));
   }, [coin]);
 
   const onBuyTokens = useCallback(() => {
@@ -62,56 +91,73 @@ export const ModalWindowBodyBuyCoins = ({
     fetch('/api/create-buy-order', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         symbol: coin,
         side: orderSides.buy,
         type: isLimitOrder ? orderTypes.limit : orderTypes.market,
-        ...(isLimitOrder ? { 
-          quantity: wantBuyCoinsAmount,
-          price: oneCoinPriceForLimitOrder,
-        } : {
-          quantity: wantBuyCoinsAmount,
-        })
-      })
+        ...(isLimitOrder
+          ? {
+              quantity: wantBuyCoinsAmount,
+              price: oneCoinPriceForLimitOrder,
+            }
+          : {
+              quantity: wantBuyCoinsAmount,
+            }),
+      }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        if (data.status === 'ERROR') {
-          setError(data);
-        }
+      .then((response) => {
+        onCheckBuyTokensResponse(response);
       })
-      .catch((e) => setError(data))
-      .finally(() => setIsOrderCreating(false))
-  }, [coin, isLimitOrder, oneCoinPriceForLimitOrder, wantBuyCoinsAmount]);
+      .catch((e) => {
+        // TODO: need to add handler setError(data)
+      }).finally(() => {
+        setIsOrderCreating(false);
+      })
+  }, [
+    coin,
+    isLimitOrder,
+    oneCoinPriceForLimitOrder,
+    wantBuyCoinsAmount,
+    onCheckBuyTokensResponse,
+  ]);
+
+  useEffect(() => {
+    if (buyTokensData) {
+      onClose();
+      onLoadOrders();
+    }
+  }, [buyTokensData]);
 
   return (
     <>
-      {error ? (
-        <Alert 
-          intent="danger"
-          text={error.data.message}
-          onClearError={() => setError(null)}
-          title="Error"
-        />) : null
-      }
+      {buyTokensError || coinError ? (
+        <Alert
+          intent='danger'
+          text={buyTokensError.data.message || coinError.data.message}
+          onClearError={() => {
+            setCoinError(null);
+            setBuyTokensError(null);
+          }}
+          title='Error'
+        />
+      ) : null}
 
-      {isLoading ? <Loader /> : (
-        <div className="grid grid-cols-2 gap-4 text-xs font-bold">
-          <div className="flex justify-end items-center">
-            <p className="text-right">One {coin} price:</p>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <div className='grid grid-cols-2 gap-4 text-xs font-bold'>
+          <div className='flex justify-end items-center'>
+            <p className='text-right'>One {coin} price:</p>
           </div>
-          <div>
-            <p>{buyCoinsData?.currentCoin.price ? Number(buyCoinsData?.currentCoin.price) : '-'} $</p>
-          </div>
+          <div>{coinData?.oneCoinPrice || ' '}&nbsp;$</div>
 
           <div>
-            <p className="text-right">Available USDT:</p>
+            <p className='text-right'>Available USDT:</p>
           </div>
-          <div>
-            <p>{buyCoinsData?.stableCoin.free ? Number(buyCoinsData?.stableCoin.free) : '-'} $</p>
-          </div>
+          <div>{coinData?.moneyAvailable || ' '}&nbsp;$</div>
 
           <div className='flex justify-end items-center'>
             <p className='text-right'>Spend money:</p>
@@ -119,9 +165,9 @@ export const ModalWindowBodyBuyCoins = ({
           <div>
             <input
               onChange={onChangeSpendMoneyInDollars}
-              className="border-2 w-28 rounded-md p-2 text-xs font-bold"
+              className='border-2 w-28 rounded-md p-2 text-xs font-bold'
               value={spendMoneyInDollars}
-              type="number"
+              type='number'
             />
             &nbsp;$
           </div>
@@ -132,9 +178,9 @@ export const ModalWindowBodyBuyCoins = ({
           <div>
             <input
               onChange={onChangeCoinsAmount}
-              className="border-2 w-28 rounded-md p-2 text-xs font-bold"
+              className='border-2 w-28 rounded-md p-2 text-xs font-bold'
               value={wantBuyCoinsAmount}
-              type="number"
+              type='number'
             />
           </div>
 
@@ -146,11 +192,10 @@ export const ModalWindowBodyBuyCoins = ({
               checked={isLimitOrder}
               onChange={onChangeIsLimitOrder}
               className='border-2'
-              type="checkbox"
+              type='checkbox'
             />
           </div>
-        {
-          isLimitOrder ? (
+          {isLimitOrder ? (
             <>
               <div className='flex justify-end items-center'>
                 <p className='text-right'>One coin should cost:</p>
@@ -158,46 +203,42 @@ export const ModalWindowBodyBuyCoins = ({
               <div>
                 <input
                   onChange={onChangeLimitOrderOneCoinCost}
-                  className="border-2 w-28 rounded-md p-2 text-xs font-bold"
+                  className='border-2 w-28 rounded-md p-2 text-xs font-bold'
                   value={oneCoinPriceForLimitOrder}
-                  type="number"
+                  type='number'
                   min={0}
-                  max={Number(buyCoinsData?.currentCoin.price)}
+                  max={coinData?.oneCoinPrice}
                 />
                 &nbsp;$
               </div>
             </>
-          ) : null
-        }
-        </div>)}
+          ) : null}
+        </div>
+      )}
 
-      <div className="text-right pt-4">
-        <Button 
-          intent="default"
-          onClick={onClose}
-        >
+      <div className='text-right pt-4'>
+        <Button intent='default' onClick={onClose}>
           {msgBtnClose}
         </Button>
-        {
-          !isLoading ? (
-            <Button 
-              intent="primary"
-              className="ml-4"
-              isLoading={isOrderCreating}
-              onClick={onBuyTokens}
-            >
-              {msgBtnApply}
-            </Button>
-          ) : null 
-        }
+        {!isLoading ? (
+          <Button
+            intent='primary'
+            className='ml-4'
+            isLoading={isOrderCreating}
+            onClick={onBuyTokens}
+          >
+            {msgBtnApply}
+          </Button>
+        ) : null}
       </div>
     </>
-  )
-}
+  );
+};
 
 ModalWindowBodyBuyCoins.propTypes = {
   coin: PropTypes.string,
   onClose: PropTypes.func,
+  onLoadOrders: PropTypes.func,
   msgBtnApply: PropTypes.string,
   msgBtnClose: PropTypes.string,
-}
+};

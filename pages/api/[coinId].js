@@ -1,6 +1,10 @@
 import prisma from '../../lib/prisma';
+import { authGuardHof } from '../../utils/guards';
+import { ApiResponseSuccess, RESPONSE_STATUSES } from '../../utils/responses';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
+  // TODO: error handling and pagination
+
   const { coinId } = req.query;
 
   const coin = await prisma.coin.findUnique({
@@ -8,9 +12,15 @@ export default async function handler(req, res) {
       id: coinId,
     },
     include: {
-      orders: true,
+      orders: {
+        include: {
+          orderParts: true,
+        }
+      }
     }
   });
 
-  res.status(200).json(coin);
+  res.status(200).json(new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, { coin }));
 }
+
+export default authGuardHof(handler);

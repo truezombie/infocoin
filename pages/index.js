@@ -1,30 +1,36 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+
+import { useRequestManager } from '../hooks/useResponseChecker';
 import {
   FullBlockLoader,
   Button,
   ModalWindow,
   ModalWindowBodyAddCoin,
   FullBlockMessage,
+  Header,
 } from '../components';
 
 export default function Home() {
-  const [userCoins, setUserCoins] = useState([]);
+  const { data, onCheckResponse } = useRequestManager();
   const [userCoinsIsLoading, setUserCoinsIsLoading] = useState(false);
   const [addCoinIsOpenModalWindow, setAddCoinIsOpenModalWindow] =
     useState(false);
 
-  const getAccessibleCoins = () => {
+  const getAccessibleCoins = useCallback(() => {
     setUserCoinsIsLoading(true);
 
     fetch('/api/accessible-coins')
       .then((response) => response.json())
-      .then((data) => setUserCoins(data))
+      .then((response) => onCheckResponse(response))
+      .catch(() => {
+        // TODO: need to implement
+      })
       .finally(() => {
         setUserCoinsIsLoading(false);
       });
-  }
+  }, [onCheckResponse]);
 
   useEffect(() => {
     getAccessibleCoins();
@@ -39,42 +45,32 @@ export default function Home() {
       </Head>
 
       <main className='flex flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen'>
-        <div className='flex flex-row items-end justify-between py-4'>
-          <div>
-            <h1 className='text-5xl font-extrabold tracking-tight text-gray-900'>
-              Infocoin
-            </h1>
-          </div>
-          <div>
-            <Button
-              intent='primary'
-              onClick={() => setAddCoinIsOpenModalWindow(true)}
-            >
-              Add new coin
-            </Button>
-          </div>
-        </div>
+        <Header>
+          <Button
+            intent='primary'
+            onClick={() => setAddCoinIsOpenModalWindow(true)}
+          >
+            Add new coin
+          </Button>
+        </Header>
 
         {userCoinsIsLoading ? <FullBlockLoader /> : null}
 
-        {!userCoinsIsLoading && userCoins.length === 0 ? (
+        {!userCoinsIsLoading && data?.coins.length === 0 ? (
           <FullBlockMessage text='No data found' />
         ) : null}
 
-        {!userCoinsIsLoading && userCoins.length !== 0 ? (
-          <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
-            {userCoins.map((userCoin) => {
+        {!userCoinsIsLoading && data?.coins?.length !== 0 ? (
+          <div className='grid grid-cols-2 lg:grid-cols-6 gap-4'>
+            {data?.coins.map((userCoin) => {
               return (
                 <div
                   key={userCoin.coin}
                   className='py-4 px-4 text-center bg-white rounded-md duration-300 hover:shadow-md shadow-sm border relative'
                 >
                   <p className='text-xl font-extrabold'>{userCoin.coin}</p>
-                  <p className='text-xs text-slate-400'>
+                  <p className='text-xs text-slate-400 mb-4'>
                     {userCoin.fullCoinName}
-                  </p>
-                  <p className='text-1xl font-extrabold mb-4 mt-4'>
-                    {userCoin.amount}
                   </p>
                   <span className='flex h-3 w-3 absolute right-4 top-4'>
                     <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'></span>

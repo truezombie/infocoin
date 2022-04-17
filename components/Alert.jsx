@@ -14,7 +14,7 @@ export const Alert = ({ intent, text, title, onClearError }) => {
   }
 
   return text ? (
-    <div className={`mb-6 rounded-md text-sm text-white sm:px-3 lg:px-4 sm:py-3 lg:py-4 ${AlertIntends[intent]}`}>
+    <div className={`mb-4 rounded-md text-sm text-white px-4 py-4 ${AlertIntends[intent]}`}>
       <div className='grid grid-cols-2'>
         <div>
           <p className='font-extrabold text-xl'>{title}</p>

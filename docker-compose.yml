@@ -14,5 +14,22 @@ services:
       - ${DB_PORT}:5432
     volumes:
       - db:/var/lib/postgresql/data
+  cron:
+    container_name: cron
+    image: cron
+    network_mode: host
+    build:
+      # context: ./
+      # target: development
+      dockerfile: ./Dockerfile
+    # volumes:
+      # - ./:/usr/src/app
+      # - /usr/src/app/node_modules
+    # ports:
+      # - ${SERVER_PORT}:3000
+    # networks:
+      # - true-cards-application-api-network
+    # command: npm run start:dev
+    # restart: unless-stopped
 volumes:
   db:

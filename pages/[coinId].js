@@ -8,11 +8,15 @@ import {
   ModalWindowBodyBuyCoins,
   FullBlockMessage,
   Button,
+  Header,
 } from '../components';
+import { useRequestManager } from '../hooks/useResponseChecker';
 import { getDateFromTimestamp } from '../utils/time';
+import { getOrderSideLabel, getOrderTypeLabel, getOrderPartStatusLabel, getOrderStatusLabel } from '../utils/labels';
 
 export default function Coin() {
-  const [coinData, setCoinData] = useState(null);
+  const { data, onCheckResponse } = useRequestManager();
+  // const [coinData, setCoinData] = useState(null);
   const [transactionsIsLoading, setTransactionsIsLoading] = useState(true);
   // const [createOrderModalWindowIsOpen, setCreateOrderModalWindowIsOpen] =
   //   useState({
@@ -24,16 +28,20 @@ export default function Coin() {
   const router = useRouter();
   const { coinId } = router.query;
 
-  useEffect(() => {
+  const onLoadOrders = useCallback(() => {
     if (coinId) {
       fetch(`/api/${coinId}`)
         .then((response) => response.json())
-        .then((data) => {
-          setCoinData(data);
+        .then((response) => {
+          onCheckResponse(response);
         })
         .finally(() => setTransactionsIsLoading(false));
     }
-  }, [coinId]);
+  }, [coinId, onCheckResponse]);
+
+  useEffect(() => {
+    onLoadOrders();
+  }, [onLoadOrders]);
 
   // const onCloseCreateOrderModalWindow = useCallback(() => {
   //   setCreateOrderModalWindowIsOpen({
@@ -48,65 +56,61 @@ export default function Coin() {
     setBuyTokensModalWindowIsOpen(false);
   }, []);
 
+  console.log(data);
+
   return (
     <>
       <main className='flex flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen'>
-        <div className='flex flex-row items-end justify-between py-4'>
-          <div>
-            <h1 className='text-5xl font-extrabold tracking-tight text-gray-900'>
-              Infocoin
-            </h1>
-          </div>
-          <div className='sm:pr-3 lg:pr-4'>
-            <Button
-              intent='primary'
-              onClick={() => setBuyTokensModalWindowIsOpen(true)}
-            >
-              Buy {coinData?.coin}
-            </Button>
-          </div>
-        </div>
+
+        <Header>
+          <Button
+            intent='primary'
+            onClick={() => setBuyTokensModalWindowIsOpen(true)}
+          >
+            Buy {data?.coin.coin}
+          </Button>
+        </Header>
 
         {transactionsIsLoading ? <FullBlockLoader /> : null}
 
-        {!transactionsIsLoading && (!coinData || coinData?.orders.length === 0) ? (
+        {!transactionsIsLoading && (!data || data?.coin.orders.length === 0) ? (
           <FullBlockMessage text='No data found' />
         ) : null}
 
-        {!transactionsIsLoading && coinData && coinData?.orders.length !== 0 ? (
+        {!transactionsIsLoading && data && data?.coin.orders.length !== 0 ? (
           <table className='table-auto'>
             <thead>
               <tr>
-                <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r rounded-tl-md'>
-                  Status
+                <th className='bg-white p-2 text-left text-sm border-b-2 border-r rounded-tl-md'>
+                  Order status
                 </th>
-                <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
+                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
                   Data
                 </th>
-                <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
-                  {coinData?.coin} amount
+                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
+                  {data?.coin} amount
                 </th>
-                <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
+                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
                   Price $
                 </th>
-                <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
-                  Price for 1 {coinData?.coin}
+                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
+                  Price for 1 {data?.coin}
                 </th>
-                <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
-                  Status
+                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
+                  Order part status
                 </th>
-                <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
+                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
                   Order type
                 </th>
-                <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b border-r'>
+                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
                   Order side
                 </th>
-                <th className='bg-emerald-50 px-2 py-1 text-left text-sm border-b rounded-tr-md'></th>
+                <th className='bg-white p-2 text-left text-sm border-b-2 rounded-tr-md'></th>
               </tr>
             </thead>
 
             <tbody>
-              {coinData?.orders.map((transaction, transactionIndex) => (
+              {data?.orders.map((transaction, transactionIndex) => (
                 <Fragment key={transaction.id}>
                   {transaction?.orderParts.length !== 0
                     ? transaction?.orderParts.map((orderPart, index) => {
@@ -122,34 +126,34 @@ export default function Coin() {
                             {index === 0 ? (
                               <td
                                 rowSpan={transaction.orderParts.length}
-                                className='px-2 py-1 border-r border-b text-xs'
+                                className='p-2 border-r border-b text-xs'
                               >
-                                {transaction.status}
+                                {getOrderStatusLabel(transaction.status)}
                               </td>
                             ) : null}
-                            <td className='px-2 py-1 border-b border-r text-xs'>
+                            <td className='p-2 border-b border-r text-xs'>
                               {getDateFromTimestamp(orderPart.transactTime)}
                             </td>
-                            <td className='px-2 py-1 border-b border-r text-xs'>
+                            <td className='p-2 border-b border-r text-xs'>
                               {orderPart.coinsAmount}
                             </td>
-                            <td className='px-2 py-1 border-b border-r text-xs'>
+                            <td className='p-2 border-b border-r text-xs'>
                               {orderPart.fullPrice}
                             </td>
-                            <td className='px-2 py-1 border-b border-r text-xs'>
+                            <td className='p-2 border-b border-r text-xs'>
                               {orderPart.oneCoinPrice}
                             </td>
-                            <td className='px-2 py-1 border-b border-r text-xs'>
-                              {orderPart.status}
+                            <td className='p-2 border-b border-r text-xs'>
+                              {getOrderPartStatusLabel(orderPart.status)}
                             </td>
-                            <td className='px-2 py-1 border-b border-r text-xs'>
-                              {orderPart.type}
+                            <td className='p-2 border-b border-r text-xs'>
+                              {getOrderTypeLabel(orderPart.type)}
                             </td>
-                            <td className='px-2 py-1 border-b border-r text-xs'>
-                              {orderPart.side}
+                            <td className='p-2 border-b border-r text-xs'>
+                              {getOrderSideLabel(orderPart.side)}
                             </td>
-                            <td className='px-2 py-1 border-l border-b text-xs'>
-                              button
+                            <td className='p-2 border-l border-b text-xs'>
+                              <button className='text-xs font-bold text-blue-500 hover:text-blue-600'>Sell tokens</button>
                             </td>
                           </tr>
                         );
@@ -181,11 +185,12 @@ export default function Coin() {
           onApply={onApplyCreateOrderModalWindow}
         />
       </ModalWindow> */}
-      <ModalWindow isOpen={buyTokensModalWindowIsOpen} msgTitle={`Buy ${coinData?.coin}`}>
+      <ModalWindow isOpen={buyTokensModalWindowIsOpen} msgTitle={`Buy ${data?.coin.coin}`}>
         <ModalWindowBodyBuyCoins
-          coin={coinData?.coin}
+          coin={data?.coin.coin}
           msgBtnClose='Close'
           msgBtnApply='Buy coins'
+          onLoadOrders={onLoadOrders}
           onClose={onCloseBuyTokensModalWindow}
         />
       </ModalWindow>

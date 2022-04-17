@@ -1,14 +1,27 @@
+const toFormatWithZero = (value) => {
+  if (value < 10) {
+    return `0${value}`;
+  }
+
+  return value;
+};
+
 export const getDateFromTimestamp = (timestamp) => {
-  const today = new Date(timestamp);
+  const today = new Date(Number(timestamp));
 
   const date =
     today.getFullYear() +
     '-' +
-    (today.getMonth() + 1) +
+    toFormatWithZero(today.getMonth() + 1) +
     '-' +
-    today.getDate();
+    toFormatWithZero(today.getDate());
+
   const time =
-    today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+    toFormatWithZero(today.getHours()) +
+    ':' +
+    toFormatWithZero(today.getMinutes()) +
+    ':' +
+    toFormatWithZero(today.getSeconds());
 
   return `${date} ${time}`;
 };

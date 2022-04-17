@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+
+import { useRequestManager } from '../hooks/useResponseChecker';
 
 import { Button } from './Button';
 import { Alert } from './Alert';
@@ -10,9 +12,9 @@ export const ModalWindowBodyAddCoin = ({
   msgBtnApply,
   msgBtnClose,
 }) => {
-  const [coin, setCoin] = useState();
-  const [error, setError] = useState(null);
+  const { data, error, onCheckResponse, setError } = useRequestManager();
   const [addCoinIsLoading, setAddCoinIsLoading] = useState(false);
+  const [coin, setCoin] = useState();
 
   const onAddToken = () => {
     setAddCoinIsLoading(true);
@@ -27,22 +29,22 @@ export const ModalWindowBodyAddCoin = ({
       })
     })
       .then((response) => response.json())
-      .then((data) => {
-        if (data.status === 'ERROR') {
-          setError(data);
-        } else {
-          onApply();
-        }
+      .then((response) => {
+        onCheckResponse(response);
       })
-      .catch((e) => setError(e))
-      .finally(() => {
-          setAddCoinIsLoading(false)
-
-          if (!error) {
-            onClose();
-          }
+      .catch((e) => {
+        setAddCoinIsLoading(false);
+        // TODO: setError(e); need to handle
       })
   }
+
+  useEffect(() => {
+    if (data) {
+      setAddCoinIsLoading(false);
+      onApply();
+      onClose();
+    }
+  }, [data]);
 
   const onChangeCoinName = (e) => {
     const name = e.target.value;
@@ -69,7 +71,7 @@ export const ModalWindowBodyAddCoin = ({
         <div>
           <input
             onChange={onChangeCoinName}
-            className="border-2 rounded-md p-2 mr-2 text-xs font-bold w-full uppercase"
+            className="border-2 rounded-md p-2 text-xs font-bold w-full uppercase"
             type="text"
           />
         </div>
