@@ -25,7 +25,7 @@ async function handler(req, res) {
   const user = await getUserByEmail(email);
 
   if (!user) {
-    return res
+    res
       .status(404)
       .send(
         new ApiResponseError(
@@ -33,15 +33,19 @@ async function handler(req, res) {
           new ErrorData(404, 'User not found!')
         )
       );
+
+    return;
   } else if (password !== user.password) {
-    return res
-      .status(401)
+    res
+      .status(403)
       .send(
         new ApiResponseError(
           RESPONSE_STATUSES.ERROR,
-          new ErrorData(401, "Password isn't correct!")
+          new ErrorData(403, "Password isn't correct!")
         )
       );
+
+    return;
   } else {
     const { id, nickName } = user;
 

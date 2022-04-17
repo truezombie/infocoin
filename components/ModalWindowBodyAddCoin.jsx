@@ -33,14 +33,14 @@ export const ModalWindowBodyAddCoin = ({
         onCheckResponse(response);
       })
       .catch((e) => {
-        setAddCoinIsLoading(false);
         // TODO: setError(e); need to handle
+      }).finally(() => {
+        setAddCoinIsLoading(false);
       })
   }
 
   useEffect(() => {
     if (data) {
-      setAddCoinIsLoading(false);
       onApply();
       onClose();
     }
