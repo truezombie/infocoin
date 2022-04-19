@@ -7,7 +7,9 @@ async function handler(req, res) {
 
   const coins = await prisma.coin.findMany();
 
-  res.status(200).json(new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, { coins }))
+  res
+    .status(200)
+    .json(new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, { coins }));
 }
 
 export default authGuardHof(handler);

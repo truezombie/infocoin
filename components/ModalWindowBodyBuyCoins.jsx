@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
@@ -40,7 +41,7 @@ export const ModalWindowBodyBuyCoins = ({
     setSpendMoneyInDollars(value);
     setWantBuyCoinsAmount(
       value /
-        (isLimitOrder ? oneCoinPriceForLimitOrder : coinData?.oneCoinPrice)
+        (isLimitOrder ? oneCoinPriceForLimitOrder : coinData?.oneCoinPrice),
     );
   };
 
@@ -57,8 +58,8 @@ export const ModalWindowBodyBuyCoins = ({
       Number(
         isLimitOrder
           ? value * oneCoinPriceForLimitOrder
-          : value * coinData?.oneCoinPrice
-      ).toFixed(2)
+          : value * coinData?.oneCoinPrice,
+      ).toFixed(2),
     );
   };
 
@@ -69,8 +70,8 @@ export const ModalWindowBodyBuyCoins = ({
       Number(
         turnIsLimitOrder
           ? wantBuyCoinsAmount * oneCoinPriceForLimitOrder
-          : wantBuyCoinsAmount * coinData?.oneCoinPrice
-      ).toFixed(2)
+          : wantBuyCoinsAmount * coinData?.oneCoinPrice,
+      ).toFixed(2),
     );
   };
 
@@ -113,9 +114,10 @@ export const ModalWindowBodyBuyCoins = ({
       })
       .catch((e) => {
         // TODO: need to add handler setError(data)
-      }).finally(() => {
-        setIsOrderCreating(false);
       })
+      .finally(() => {
+        setIsOrderCreating(false);
+      });
   }, [
     coin,
     isLimitOrder,

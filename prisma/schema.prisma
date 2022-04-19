@@ -31,7 +31,7 @@ model Order {
   status     OrderStatus @default(BUY_IN_PROGRESS)
   orderParts OrderPart[]
   coin       Coin?       @relation(fields: [coinId], references: [id])
-  coinId     String?
+  coinId     String?     @unique
 }
 
 model OrderPart {

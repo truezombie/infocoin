@@ -8,19 +8,21 @@ async function handler(req, res) {
   const { coinId } = req.query;
 
   const coin = await prisma.coin.findUnique({
-    where: { 
+    where: {
       id: coinId,
     },
     include: {
       orders: {
         include: {
           orderParts: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
-  res.status(200).json(new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, { coin }));
+  res
+    .status(200)
+    .json(new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, { coin }));
 }
 
 export default authGuardHof(handler);

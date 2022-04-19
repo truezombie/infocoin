@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useCallback, Fragment } from 'react';
 
@@ -12,12 +13,17 @@ import {
 } from '../components';
 import { useRequestManager } from '../hooks/useResponseChecker';
 import { getDateFromTimestamp } from '../utils/time';
-import { getOrderSideLabel, getOrderTypeLabel, getOrderPartStatusLabel, getOrderStatusLabel } from '../utils/labels';
+import {
+  getOrderSideLabel,
+  getOrderTypeLabel,
+  getOrderPartStatusLabel,
+  getOrderStatusLabel,
+} from '../utils/labels';
 
 export default function Coin() {
   const { data, onCheckResponse } = useRequestManager();
   // const [coinData, setCoinData] = useState(null);
-  const [transactionsIsLoading, setTransactionsIsLoading] = useState(true);
+  const [transactionsIsLoading, setTransactionsIsLoading] = useState(false);
   // const [createOrderModalWindowIsOpen, setCreateOrderModalWindowIsOpen] =
   //   useState({
   //     isOpen: false,
@@ -29,6 +35,8 @@ export default function Coin() {
   const { coinId } = router.query;
 
   const onLoadOrders = useCallback(() => {
+    setTransactionsIsLoading(true);
+
     if (coinId) {
       fetch(`/api/${coinId}`)
         .then((response) => response.json())
@@ -56,12 +64,9 @@ export default function Coin() {
     setBuyTokensModalWindowIsOpen(false);
   }, []);
 
-  console.log(data);
-
   return (
     <>
       <main className='flex flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen'>
-
         <Header>
           <Button
             intent='primary'
@@ -88,13 +93,13 @@ export default function Coin() {
                   Data
                 </th>
                 <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
-                  {data?.coin} amount
+                  {data.coin.coin} amount
                 </th>
                 <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
                   Price $
                 </th>
                 <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
-                  Price for 1 {data?.coin}
+                  Price for 1 {data.coin.coin}
                 </th>
                 <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
                   Order part status
@@ -110,7 +115,7 @@ export default function Coin() {
             </thead>
 
             <tbody>
-              {data?.orders.map((transaction, transactionIndex) => (
+              {data?.coin.orders.map((transaction, transactionIndex) => (
                 <Fragment key={transaction.id}>
                   {transaction?.orderParts.length !== 0
                     ? transaction?.orderParts.map((orderPart, index) => {
@@ -153,7 +158,9 @@ export default function Coin() {
                               {getOrderSideLabel(orderPart.side)}
                             </td>
                             <td className='p-2 border-l border-b text-xs'>
-                              <button className='text-xs font-bold text-blue-500 hover:text-blue-600'>Sell tokens</button>
+                              <button className='text-xs font-bold text-blue-500 hover:text-blue-600'>
+                                Sell tokens
+                              </button>
                             </td>
                           </tr>
                         );
@@ -185,7 +192,10 @@ export default function Coin() {
           onApply={onApplyCreateOrderModalWindow}
         />
       </ModalWindow> */}
-      <ModalWindow isOpen={buyTokensModalWindowIsOpen} msgTitle={`Buy ${data?.coin.coin}`}>
+      <ModalWindow
+        isOpen={buyTokensModalWindowIsOpen}
+        msgTitle={`Buy ${data?.coin.coin}`}
+      >
         <ModalWindowBodyBuyCoins
           coin={data?.coin.coin}
           msgBtnClose='Close'

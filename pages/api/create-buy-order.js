@@ -13,20 +13,20 @@ async function getBinanceCreatedUserOrder(orderId, symbol) {
   const timestamp = getTimestamp();
   const binanceCreatedUserOrderQuery = `symbol=${symbol}USDT&orderId=${orderId}&timestamp=${timestamp}`;
   const binanceCreatedUserOrderSignature = getSignature(
-    binanceCreatedUserOrderQuery
+    binanceCreatedUserOrderQuery,
   );
   const binanceCreatedUserOrderRaw = await fetch(
     `https://api.binance.com/api/v3/allOrders?${binanceCreatedUserOrderQuery}&signature=${binanceCreatedUserOrderSignature}`,
     {
       ...getHeaders(),
-    }
+    },
   );
   const binanceCreatedUserOrder = await binanceCreatedUserOrderRaw.json();
 
   return binanceCreatedUserOrder;
 }
 
-async function getCoin(abbreviationCoin) {
+export async function getCoin(abbreviationCoin, res) {
   try {
     const coin = await await prisma.coin.findUnique({
       where: {
@@ -40,8 +40,8 @@ async function getCoin(abbreviationCoin) {
         .json(
           new ApiResponseError(
             RESPONSE_STATUSES.ERROR,
-            new ErrorData(404, 'Coin not found')
-          )
+            new ErrorData(404, 'Coin not found'),
+          ),
         );
     }
 
@@ -60,7 +60,7 @@ async function handler(req, res) {
     ? `type=${orderTypes.limit}&quantity=${quantity}&price=${price}`
     : `type=${orderTypes.market}&quantity=${quantity}`;
 
-  const query = `symbol=${symbol}USDT&side=${side}&${orderTypeQueryParams}&timestamp=${timestamp}`;
+  const query = `symbol=${symbol}USDT&side=${side}&${orderTypeQueryParams}&timeInForce=GTC&timestamp=${timestamp}`;
   const signature = getSignature(query);
 
   try {
@@ -69,7 +69,7 @@ async function handler(req, res) {
       {
         method: 'POST',
         ...getHeaders(),
-      }
+      },
     );
     const binanceCreateOrderResponse =
       await binanceCreateOrderResponseRaw.json();
@@ -82,18 +82,18 @@ async function handler(req, res) {
             RESPONSE_STATUSES.ERROR,
             new ErrorData(
               binanceCreateOrderResponse?.code,
-              binanceCreateOrderResponse?.msg
-            )
-          )
+              binanceCreateOrderResponse?.msg,
+            ),
+          ),
         );
     }
 
     const binanceCreatedUserOrder = await getBinanceCreatedUserOrder(
       binanceCreateOrderResponse.orderId,
-      symbol
+      symbol,
     );
 
-    const coin = await getCoin(symbol);
+    const coin = await getCoin(symbol, res);
     const oneCoinPrice = isLimitOrder
       ? Number(binanceCreateOrderResponse.price)
       : Number(binanceCreatedUserOrder[0].price);
@@ -119,9 +119,10 @@ async function handler(req, res) {
       },
     });
 
-    res.status(200).json(new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, order));
+    res
+      .status(200)
+      .json(new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, order));
   } catch (e) {
-    console.log(e)
     res.status(500).json(new ApiResponseError());
   }
 }

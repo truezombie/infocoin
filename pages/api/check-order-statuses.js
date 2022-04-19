@@ -1,17 +1,19 @@
+import { STABLE_COIN } from '../../utils/constants';
 import { getTimestamp, getSignature, getHeaders } from '../../utils/api';
 import { ApiResponseError, ApiResponseSuccess } from '../../utils/responses';
 import { orderStatuses, orderPartStatuses } from '../../utils/constants';
-import { localhostRequestGuardHof, authGuardHof } from '../../utils/guards';
+import { localhostRequestGuardHof } from '../../utils/guards';
 import prisma from '../../lib/prisma';
 
-const getOpenBinanceOrders = async () => {
+export const getOpenBinanceOrders = async (symbol) => {
   const timestamp = getTimestamp();
-  const query = `timestamp=${timestamp}`;
+  const currentSymbol = symbol ? `symbol=${symbol}${STABLE_COIN}` : '';
+  const query = `${currentSymbol}&timestamp=${timestamp}`;
   const signature = getSignature(query);
 
   const ordersRaw = await fetch(
     `https://api.binance.com/api/v3/openOrders?${query}&signature=${signature}`,
-    getHeaders()
+    getHeaders(),
   );
   const orders = await ordersRaw.json();
 
@@ -63,4 +65,4 @@ async function handler(req, res) {
   */
 }
 
-export default localhostRequestGuardHof(authGuardHof(handler));
+export default localhostRequestGuardHof(handler);

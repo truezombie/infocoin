@@ -30,8 +30,8 @@ async function handler(req, res) {
       .send(
         new ApiResponseError(
           RESPONSE_STATUSES.ERROR,
-          new ErrorData(404, 'User not found!')
-        )
+          new ErrorData(404, 'User not found!'),
+        ),
       );
 
     return;
@@ -41,8 +41,8 @@ async function handler(req, res) {
       .send(
         new ApiResponseError(
           RESPONSE_STATUSES.ERROR,
-          new ErrorData(403, "Password isn't correct!")
-        )
+          new ErrorData(403, "Password isn't correct!"),
+        ),
       );
 
     return;
@@ -58,7 +58,7 @@ async function handler(req, res) {
       serialize('token', token, {
         path: '/',
         maxAge: 60 * 60 * 24 * 1,
-      })
+      }),
     );
 
     res

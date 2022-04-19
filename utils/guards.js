@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken';
 import {
   defaultNotAuthorizedError,
   defaultNotPostRequestError,
+  ApiResponseError,
+  RESPONSE_STATUSES,
+  ErrorData,
 } from './responses';
 
 export function localhostRequestGuardHof(handler) {
@@ -13,8 +16,8 @@ export function localhostRequestGuardHof(handler) {
         .send(
           new ApiResponseError(
             RESPONSE_STATUSES.ERROR,
-            new ErrorData(405, 'Only localhost requests allowed')
-          )
+            new ErrorData(405, 'Only localhost requests allowed'),
+          ),
         );
       return;
     }
@@ -37,14 +40,10 @@ export function postRequestGuardHof(handler) {
 export function authGuardHof(handler) {
   return async (req, res) => {
     try {
-      const payload = await jwt.verify(
-        req.cookies?.token || '',
-        process.env.JWT_SALT
-      );
+      await jwt.verify(req.cookies?.token || '', process.env.JWT_SALT);
 
       handler(req, res);
     } catch (e) {
-      console.log(e);
       res.status(401).json(defaultNotAuthorizedError);
     }
   };

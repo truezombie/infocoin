@@ -30,10 +30,10 @@ export class ApiResponseSuccess extends ApiResponse {
 
 export const defaultNotPostRequestError = new ApiResponseError(
   RESPONSE_STATUSES.ERROR,
-  new ErrorData(405, 'Only POST requests allowed')
+  new ErrorData(405, 'Only POST requests allowed'),
 );
 
 export const defaultNotAuthorizedError = new ApiResponseError(
   RESPONSE_STATUSES.ERROR,
-  new ErrorData(401, 'Not authorized!')
+  new ErrorData(401, 'Not authorized!'),
 );

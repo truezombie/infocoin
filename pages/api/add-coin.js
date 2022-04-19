@@ -9,6 +9,37 @@ import {
   RESPONSE_STATUSES,
   ErrorData,
 } from '../../utils/responses';
+import { getOpenBinanceOrders } from './check-order-statuses';
+import { orderStatuses } from '../../utils/constants';
+
+async function fillOpenedCoinOrders({ id, coin }) {
+  const binanceOpenOrders = await getOpenBinanceOrders(coin);
+
+  await Promise.all(
+    binanceOpenOrders.map((order) => {
+      return prisma.order.create({
+        data: {
+          coinId: id,
+          status: orderStatuses.sellInProgress,
+          orderParts: {
+            create: [
+              {
+                oneCoinPrice: Number(order.price),
+                clientOrderId: order.clientOrderId,
+                transactTime: String(order.time),
+                fullPrice: Number(order.origQty) * order.price,
+                coinsAmount: Number(order.origQty),
+                status: order.status,
+                type: order.type,
+                side: order.side,
+              },
+            ],
+          },
+        },
+      });
+    }),
+  );
+}
 
 async function handler(req, res) {
   const { coin } = req.body;
@@ -20,11 +51,11 @@ async function handler(req, res) {
 
     const tokenPayload = await jwt.verify(
       req.cookies?.token || '',
-      process.env.JWT_SALT
+      process.env.JWT_SALT,
     );
     const allCoinsRaw = await fetch(
       `https://api.binance.com/sapi/v1/capital/config/getall?${query}&signature=${signature}`,
-      getHeaders()
+      getHeaders(),
     );
     const allCoins = await allCoinsRaw.json();
 
@@ -42,10 +73,12 @@ async function handler(req, res) {
         },
       });
 
+      await fillOpenedCoinOrders(createdToken);
+
       res
         .status(200)
         .json(
-          new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, { createdToken })
+          new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, { createdToken }),
         );
     } else {
       res
@@ -53,8 +86,8 @@ async function handler(req, res) {
         .json(
           new ApiResponseError(
             RESPONSE_STATUSES.ERROR,
-            new ErrorData(500, "Isn't valid coin name!")
-          )
+            new ErrorData(500, "Isn't valid coin name!"),
+          ),
         );
     }
   } catch (e) {

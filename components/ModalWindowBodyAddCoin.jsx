@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
@@ -22,11 +23,11 @@ export const ModalWindowBodyAddCoin = ({
     fetch('/api/add-coin', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        coin
-      })
+        coin,
+      }),
     })
       .then((response) => response.json())
       .then((response) => {
@@ -34,10 +35,11 @@ export const ModalWindowBodyAddCoin = ({
       })
       .catch((e) => {
         // TODO: setError(e); need to handle
-      }).finally(() => {
-        setAddCoinIsLoading(false);
       })
-  }
+      .finally(() => {
+        setAddCoinIsLoading(false);
+      });
+  };
 
   useEffect(() => {
     if (data) {
@@ -50,55 +52,50 @@ export const ModalWindowBodyAddCoin = ({
     const name = e.target.value;
 
     setCoin(name.toUpperCase());
-  }
+  };
 
   return (
     <>
-      {
-        error ? (
-          <Alert 
-            intent="danger"
-            text={error.data.message}
-            onClearError={() => setError(null)}
-            title="Error"
-          />
-        ) : null
-      }
-      <div className="grid grid-cols-2 gap-4 mb-4 text-xs font-bold">
+      {error ? (
+        <Alert
+          intent='danger'
+          text={error.data.message}
+          onClearError={() => setError(null)}
+          title='Error'
+        />
+      ) : null}
+      <div className='grid grid-cols-2 gap-4 mb-4 text-xs font-bold'>
         <div className='flex justify-end items-center'>
           <p className='text-right'>Coin:</p>
         </div>
         <div>
           <input
             onChange={onChangeCoinName}
-            className="border-2 rounded-md p-2 text-xs font-bold w-full uppercase"
-            type="text"
+            className='border-2 rounded-md p-2 text-xs font-bold w-full uppercase'
+            type='text'
           />
         </div>
       </div>
-      <div className="text-right">
-        <Button 
-          intent="default"
-          onClick={onClose}
-        >
+      <div className='text-right'>
+        <Button intent='default' onClick={onClose}>
           {msgBtnClose}
         </Button>
-        <Button 
+        <Button
           onClick={onAddToken}
-          intent="primary"
-          className="ml-4"
+          intent='primary'
+          className='ml-4'
           isLoading={addCoinIsLoading}
         >
           {msgBtnApply}
         </Button>
       </div>
     </>
-  )
-}
+  );
+};
 
 ModalWindowBodyAddCoin.propTypes = {
   onApply: PropTypes.func,
   onClose: PropTypes.func,
   msgBtnApply: PropTypes.string,
   msgBtnClose: PropTypes.string,
-}
+};

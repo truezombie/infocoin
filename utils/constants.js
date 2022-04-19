@@ -12,7 +12,7 @@ export const orderTypes = {
   stopLossLimit: 'STOP_LOSS_LIMIT',
   takeProfit: 'TAKE_PROFIT',
   takeProfitLimit: 'TAKE_PROFIT_LIMIT',
-  limitMaker: 'LIMIT_MAKER'
+  limitMaker: 'LIMIT_MAKER',
 };
 
 export const orderPartStatuses = {
@@ -22,12 +22,12 @@ export const orderPartStatuses = {
   canceled: 'CANCELED',
   pendingCancel: 'PENDING_CANCEL',
   rejected: 'REJECTED',
-  expired: 'EXPIRED'
-}
+  expired: 'EXPIRED',
+};
 
 export const orderStatuses = {
   buyInProgress: 'BUY_IN_PROGRESS',
   buyDone: 'BUY_DONE',
   sellInProgress: 'SELL_IN_PROGRESS',
-  sellDone: 'SELL_DONE'
-}
+  sellDone: 'SELL_DONE',
+};

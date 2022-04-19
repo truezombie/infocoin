@@ -1,9 +1,10 @@
+import React from 'react';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
-import { Button, InputWithLabel, Alert } from '../components'
+import { Button, InputWithLabel, Alert } from '../components';
 import { useRequestManager } from '../hooks/useResponseChecker';
 
 const validationSchema = yup.object({
@@ -31,22 +32,22 @@ export default function Login() {
       fetch('/api/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         credentials: 'include',
         mode: 'cors',
         body: JSON.stringify({
           email,
-          password
-        })
+          password,
+        }),
       })
         .then((response) => response.json())
         .then((response) => {
-          onCheckResponse(response)
+          onCheckResponse(response);
         })
         .catch(() => {
           // TODO: need to implement
-        })
+        });
     },
   });
 
@@ -54,7 +55,7 @@ export default function Login() {
     if (data) {
       router.push('/');
     }
-  }, [router, data])
+  }, [router, data]);
 
   return (
     <main className='flex flex-col max-w-sm mx-auto px-4 sm:px-6 lg:px-8 min-h-screen'>
@@ -65,23 +66,21 @@ export default function Login() {
         Login
       </h3>
       <div className='py-4 px-4 bg-white rounded-md shadow-sm border relative'>
-        {
-          error ? (
-            <Alert 
-              intent="danger"
-              text={error.data.message}
-              onClearError={() => setError(null)}
-              title="Error"
-            />
-          ) : null
-        }
+        {error ? (
+          <Alert
+            intent='danger'
+            text={error.data.message}
+            onClearError={() => setError(null)}
+            title='Error'
+          />
+        ) : null}
 
         <form onSubmit={formik.handleSubmit}>
           <div className='mb-4'>
             <InputWithLabel
-              id="email"
-              name="email"
-              label="Email"
+              id='email'
+              name='email'
+              label='Email'
               value={formik.values.email}
               onChange={formik.handleChange}
               error={formik.touched.email && Boolean(formik.errors.email)}
@@ -91,10 +90,10 @@ export default function Login() {
 
           <div className='mb-4'>
             <InputWithLabel
-              id="password"
-              name="password"
-              label="Password"
-              type="password"
+              id='password'
+              name='password'
+              label='Password'
+              type='password'
               value={formik.values.password}
               onChange={formik.handleChange}
               error={formik.touched.password && Boolean(formik.errors.password)}
@@ -102,9 +101,11 @@ export default function Login() {
             />
           </div>
 
-          <Button type="submit" intent="primary" className="w-full" >Log in</Button>
+          <Button type='submit' intent='primary' className='w-full'>
+            Log in
+          </Button>
         </form>
       </div>
     </main>
-  )
+  );
 }

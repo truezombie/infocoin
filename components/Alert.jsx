@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 
 const AlertIntends = {
@@ -5,16 +6,18 @@ const AlertIntends = {
   primary: 'bg-blue-400',
   danger: 'bg-red-400',
   success: 'bg-green-400',
-  warning: 'bg-yellow-400'
-}
+  warning: 'bg-yellow-400',
+};
 
 export const Alert = ({ intent, text, title, onClearError }) => {
   const onClose = () => {
     onClearError();
-  }
+  };
 
   return text ? (
-    <div className={`mb-4 rounded-md text-sm text-white px-4 py-4 ${AlertIntends[intent]}`}>
+    <div
+      className={`mb-4 rounded-md text-sm text-white px-4 py-4 ${AlertIntends[intent]}`}
+    >
       <div className='grid grid-cols-2'>
         <div>
           <p className='font-extrabold text-xl'>{title}</p>
@@ -25,12 +28,18 @@ export const Alert = ({ intent, text, title, onClearError }) => {
       </div>
       <p className='text-bold'>{text}</p>
     </div>
-  ) : null
-}
+  ) : null;
+};
 
 Alert.propTypes = {
   title: PropTypes.string.isRequired,
   text: PropTypes.string,
   onClearError: PropTypes.func.isRequired,
-  intent: PropTypes.oneOf(['default', 'primary', 'danger', 'success', 'warning']).isRequired,
-}
+  intent: PropTypes.oneOf([
+    'default',
+    'primary',
+    'danger',
+    'success',
+    'warning',
+  ]).isRequired,
+};

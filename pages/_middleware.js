@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
 const HOST = 'http://localhost:3000';
 
