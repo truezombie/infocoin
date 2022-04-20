@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export const Input = ({ className, error, ...rest }) => {
   return (
@@ -10,3 +11,8 @@ export const Input = ({ className, error, ...rest }) => {
     />
   );
 };
+
+Input.propTypes = {
+  className: PropTypes.string,
+  error: PropTypes.bool
+}

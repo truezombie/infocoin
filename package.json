@@ -8,7 +8,6 @@
     "start": "next start",
     "format": "prettier --check '**/*.{jsx,js}'",
     "format:fix": "prettier --write '**/*.{jsx,js}'",
-
     "prisma:format": "npx prisma format",
     "prisma:push": "npx prisma db push",
     "prisma:studio": "npx prisma studio",
