@@ -6,7 +6,7 @@ import { Alert } from './Alert';
 import { orderSides, orderTypes } from '../utils/constants';
 import { useRequestManager } from '../hooks/useResponseChecker';
 
-export const ModalWindowBodyBuyCoins = ({
+export const ModalWindowBodySellCoins = ({
   coin,
   oneCoinPrice,
   orderPrice,
@@ -17,34 +17,37 @@ export const ModalWindowBodyBuyCoins = ({
   msgBtnClose,
 }) => {
   const {
-    data: buyTokensData,
-    error: buyTokensError,
-    setError: setBuyTokensError,
-    onCheckResponse: onCheckBuyTokensResponse,
+    data: sellTokensData,
+    error: sellTokensError,
+    setError: setSellTokensError,
+    onCheckResponse: onCheckSellTokensResponse,
   } = useRequestManager();
-  const [savePercentage, setSavePercentage] = useState(10);
+  const [earnPercentage, setEarnPercentage] = useState(10);
   const [isOrderCreating, setIsOrderCreating] = useState(false);
 
-  const willSaveMoney = useMemo(() => {
-    return (orderPrice * savePercentage) / 100;;
-  }, [savePercentage, orderPrice]);
+  const willEarnMoney = useMemo(() => {
+    const money = (earnPercentage * orderPrice) / 100;
+    const moneyWithCommission = money * 0.01 + money;
+
+    return moneyWithCommission;
+  }, [earnPercentage, orderPrice]);
 
   const willTotalPrice = useMemo(() => {
-    return orderPrice - willSaveMoney;
-  }, [willSaveMoney, orderPrice]);
+    return willEarnMoney + orderPrice;
+  }, [willEarnMoney, orderPrice]);
 
   const oneCoinWillCost = useMemo(() => {
-    return oneCoinPrice - ((oneCoinPrice * savePercentage) / 100);
-  }, [savePercentage, oneCoinPrice]);
+    return (earnPercentage * oneCoinPrice) / 100 + oneCoinPrice;
+  }, [earnPercentage, oneCoinPrice]);
 
   const onChangeEarnPercentage = (event) => {
-    setSavePercentage(Number(event.target.value));
+    setEarnPercentage(Number(event.target.value));
   };
 
   const onSellTokens = useCallback(() => {
     setIsOrderCreating(true);
 
-    fetch('/api/create-buy-order', {
+    fetch('/api/create-sell-order', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +62,7 @@ export const ModalWindowBodyBuyCoins = ({
     })
       .then((response) => response.json())
       .then((response) => {
-        onCheckBuyTokensResponse(response);
+        onCheckSellTokensResponse(response);
       })
       .catch((e) => {
         // TODO: need to add handler setError(data)
@@ -70,20 +73,20 @@ export const ModalWindowBodyBuyCoins = ({
   }, [coin, coinsAmount, oneCoinPrice]);
 
   useEffect(() => {
-    if (buyTokensData) {
+    if (sellTokensData) {
       onClose();
       onLoadOrders();
     }
-  }, [buyTokensData]);
+  }, [sellTokensData]);
 
   return (
     <>
-      {buyTokensError ? (
+      {sellTokensError ? (
         <Alert
           intent='danger'
-          text={buyTokensError.data.message}
+          text={sellTokensError.data.message}
           onClearError={() => {
-            setBuyTokensError(null);
+            setSellTokensError(null);
           }}
           title='Error'
         />
@@ -91,7 +94,7 @@ export const ModalWindowBodyBuyCoins = ({
 
       <div className='grid grid-cols-2 gap-3 sm:pb-3 lg:pb-4 text-xs font-bold'>
         <div className='flex justify-end items-center'>
-          <p className='text-right'>Will save in percentage:</p>
+          <p className='text-right'>Will earn in percentage:</p>
         </div>
         <div>
           <input
@@ -99,17 +102,17 @@ export const ModalWindowBodyBuyCoins = ({
             type='number'
             min={0}
             max={1000}
-            value={savePercentage}
+            value={earnPercentage}
             onChange={onChangeEarnPercentage}
           />
           %
         </div>
 
         <div>
-          <p className='text-right'>Will save in dollars:</p>
+          <p className='text-right'>Will earn in dollars:</p>
         </div>
         <div>
-          <p>{willSaveMoney} $</p>
+          <p>{willEarnMoney} $</p>
         </div>
 
         <div className='text-right'>Coins amount:</div>
@@ -170,7 +173,7 @@ export const ModalWindowBodyBuyCoins = ({
   );
 };
 
-ModalWindowBodyBuyCoins.propTypes = {
+ModalWindowBodySellCoins.propTypes = {
   onClose: PropTypes.func,
   onLoadOrders: PropTypes.func,
   coinsAmount: PropTypes.number.isRequired,

@@ -3,6 +3,7 @@ import { getTimestamp, getSignature, getHeaders } from '../../utils/api';
 import { ApiResponseError, ApiResponseSuccess } from '../../utils/responses';
 import { orderStatuses, orderPartStatuses } from '../../utils/constants';
 import { localhostRequestGuardHof } from '../../utils/guards';
+import { postMessageToTelegram } from '../../services/telegram';
 import prisma from '../../lib/prisma';
 
 export const getOpenBinanceOrders = async (symbol) => {
@@ -20,33 +21,76 @@ export const getOpenBinanceOrders = async (symbol) => {
   return orders;
 };
 
-const getInProgressUserOrders = async () => {
-  const orders = await prisma.order.findMany({
-    where: {
-      status: {
-        in: [orderStatuses.buyInProgress, orderStatuses.sellInProgress],
-      },
-    },
+const getAllTokens = async () => {
+  const coins = await prisma.coin.findMany({
     include: {
-      orderParts: {
+      orders: {
         where: {
           status: {
-            in: [orderPartStatuses.new],
+            in: [orderStatuses.buyInProgress, orderStatuses.sellInProgress],
           },
         },
-      },
-    },
+        include: {
+          orderParts: {
+            where: {
+              status: {
+                in: [orderPartStatuses.new],
+              },
+            },
+          },
+        },
+      }
+    }
   });
 
+  return coins;
+};
+
+const fetchOrderByClientOrderId = async (symbol, clientOrderId) => {
+  const timestamp = getTimestamp();
+  const currentSymbol = symbol ? `symbol=${symbol}${STABLE_COIN}` : '';
+  const query = `${currentSymbol}&origClientOrderId=${clientOrderId}&timestamp=${timestamp}`;
+  const signature = getSignature(query);
+
+  const ordersRaw = await fetch(
+    `https://api.binance.com/api/v3/order?${query}&signature=${signature}`,
+    getHeaders(),
+  );
+  const orders = await ordersRaw.json();
+
   return orders;
+};
+
+const closeOrders = (tokens, binanceOrders) => {
+  tokens.forEach(({ coin, orders }) => {
+    orders.forEach(({ orderParts }) => {
+      orderParts.forEach(async (orderPart) => {
+        const orderInProgress = binanceOrders.find(
+          (binanceOrder) => orderPart.clientOrderId === binanceOrder.clientOrderId,
+        );
+
+        if (!orderInProgress) {
+          // order it's a variable consist closed or filled order
+          const order = await fetchOrderByClientOrderId(
+            coin, 
+            orderPart.clientOrderId,
+          );
+
+          await postMessageToTelegram(`Order type ${order.type} of symbol ${order.symbol} was closed with status ${order.status}.`);
+
+          console.log('WAS CLOSED!', order);
+        }
+      })
+    })
+  })
 };
 
 async function handler(req, res) {
   try {
     const binanceOpenOrders = await getOpenBinanceOrders();
-    const localInProgressOrders = await getInProgressUserOrders();
+    const tokens = await getAllTokens();
 
-    console.log(localInProgressOrders, binanceOpenOrders);
+    closeOrders(tokens, binanceOpenOrders);
 
     res.status(200).json(new ApiResponseSuccess(200, {}));
   } catch (e) {

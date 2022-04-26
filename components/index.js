@@ -1,9 +1,10 @@
 import { Loader } from './Loader';
 import { Button } from './Button';
 import { ModalWindow } from './ModalWindow';
-import { ModalWindowBodyCreateOrder } from './ModalWindowBodyCreateOrder';
-import { ModalWindowBodyBuyCoins } from './ModalWindowBodyBuyCoins';
+import { ModalWindowBodySellCoins } from './ModalWindowBodySellCoins';
+import { ModalWindowBodyFirstBuyCoins } from './ModalWindowBodyFirstBuyCoins';
 import { ModalWindowBodyAddCoin } from './ModalWindowBodyAddCoin';
+import { ModalWindowBodyBuyCoins } from './ModalWindowBodyBuyCoins';
 import { FullBlockMessage } from './FullBlockMessage';
 import { FullBlockLoader } from './FullBlockLoader';
 import { Alert } from './Alert';
@@ -18,9 +19,10 @@ export {
   Input,
   Header,
   ModalWindow,
-  ModalWindowBodyCreateOrder,
-  ModalWindowBodyBuyCoins,
+  ModalWindowBodySellCoins,
+  ModalWindowBodyFirstBuyCoins,
   ModalWindowBodyAddCoin,
+  ModalWindowBodyBuyCoins,
   FullBlockMessage,
   FullBlockLoader,
   InputWithLabel,

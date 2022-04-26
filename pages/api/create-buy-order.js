@@ -6,7 +6,7 @@ import {
   ErrorData,
 } from '../../utils/responses';
 import { postRequestGuardHof, authGuardHof } from '../../utils/guards';
-import { orderTypes } from '../../utils/constants';
+import { orderTypes, orderStatuses } from '../../utils/constants';
 import prisma from '../../lib/prisma';
 
 async function getBinanceCreatedUserOrder(orderId, symbol) {
@@ -26,6 +26,7 @@ async function getBinanceCreatedUserOrder(orderId, symbol) {
   return binanceCreatedUserOrder;
 }
 
+// TODO: need to move somewhere
 export async function getCoin(abbreviationCoin, res) {
   try {
     const coin = await await prisma.coin.findUnique({
@@ -51,8 +52,8 @@ export async function getCoin(abbreviationCoin, res) {
   }
 }
 
-async function handler(req, res) {
-  const { symbol, side, type, quantity, price } = req.body;
+// TODO: need to move somewhere
+export async function createBinanceOrder(symbol, side, type, quantity, price) {
   const timestamp = getTimestamp();
   const isLimitOrder = type === orderTypes.limit;
 
@@ -63,56 +64,64 @@ async function handler(req, res) {
   const query = `symbol=${symbol}USDT&side=${side}&${orderTypeQueryParams}&timeInForce=GTC&timestamp=${timestamp}`;
   const signature = getSignature(query);
 
-  try {
-    const binanceCreateOrderResponseRaw = await fetch(
+  const binanceCreateOrderResponseRaw = await fetch(
       `https://api.binance.com/api/v3/order?${query}&signature=${signature}`,
       {
         method: 'POST',
         ...getHeaders(),
       },
     );
-    const binanceCreateOrderResponse =
-      await binanceCreateOrderResponseRaw.json();
+  
+  const binanceCreateOrderResponse = await binanceCreateOrderResponseRaw.json();
+  
+  return binanceCreateOrderResponse;
+}
 
-    if (binanceCreateOrderResponse?.code && binanceCreateOrderResponse?.msg) {
+async function handler(req, res) {
+  const { symbol, side, type, quantity, price } = req.body;
+
+  try {
+    const binanceCreateOrder = await createBinanceOrder(symbol, side, type, quantity, price);
+
+    if (binanceCreateOrder?.code && binanceCreateOrder?.msg) {
       res
         .status(500)
         .json(
           new ApiResponseError(
             RESPONSE_STATUSES.ERROR,
             new ErrorData(
-              binanceCreateOrderResponse?.code,
-              binanceCreateOrderResponse?.msg,
+              binanceCreateOrder?.code,
+              binanceCreateOrder?.msg,
             ),
           ),
         );
     }
 
     const binanceCreatedUserOrder = await getBinanceCreatedUserOrder(
-      binanceCreateOrderResponse.orderId,
+      binanceCreateOrder.orderId,
       symbol,
     );
 
     const coin = await getCoin(symbol, res);
     const oneCoinPrice = isLimitOrder
-      ? Number(binanceCreateOrderResponse.price)
+      ? Number(binanceCreateOrder.price)
       : Number(binanceCreatedUserOrder[0].price);
     const order = await prisma.order.create({
       data: {
         coinId: coin.id,
-        status: 'BUY_IN_PROGRESS',
+        status: orderStatuses.buyInProgress,
         orderParts: {
           create: [
             {
               oneCoinPrice,
-              clientOrderId: binanceCreateOrderResponse.clientOrderId,
-              transactTime: String(binanceCreateOrderResponse.transactTime),
+              clientOrderId: binanceCreateOrder.clientOrderId,
+              transactTime: String(binanceCreateOrder.transactTime),
               fullPrice:
-                Number(binanceCreateOrderResponse.origQty) * oneCoinPrice,
-              coinsAmount: Number(binanceCreateOrderResponse.origQty),
-              status: binanceCreateOrderResponse.status,
-              type: binanceCreateOrderResponse.type,
-              side: binanceCreateOrderResponse.side,
+                Number(binanceCreateOrder.origQty) * oneCoinPrice,
+              coinsAmount: Number(binanceCreateOrder.origQty),
+              status: binanceCreateOrder.status,
+              type: binanceCreateOrder.type,
+              side: binanceCreateOrder.side,
             },
           ],
         },

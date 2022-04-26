@@ -5,14 +5,16 @@ import { useState, useEffect, useCallback, Fragment } from 'react';
 import {
   FullBlockLoader,
   ModalWindow,
-  // ModalWindowBodyCreateOrder,
   ModalWindowBodyBuyCoins,
+  ModalWindowBodySellCoins,
+  ModalWindowBodyFirstBuyCoins,
   FullBlockMessage,
   Button,
   Header,
 } from '../components';
 import { useRequestManager } from '../hooks/useResponseChecker';
 import { getDateFromTimestamp } from '../utils/time';
+import { orderStatuses, orderPartStatuses } from '../utils/constants';
 import {
   getOrderSideLabel,
   getOrderTypeLabel,
@@ -24,12 +26,20 @@ export default function Coin() {
   const { data, onCheckResponse } = useRequestManager();
   // const [coinData, setCoinData] = useState(null);
   const [transactionsIsLoading, setTransactionsIsLoading] = useState(false);
-  // const [createOrderModalWindowIsOpen, setCreateOrderModalWindowIsOpen] =
-  //   useState({
-  //     isOpen: false,
-  //     data: null,
-  //   });
-  const [buyTokensModalWindowIsOpen, setBuyTokensModalWindowIsOpen] =
+  const [sellTokensModalWindowIsOpen, setSellTokensModalWindowIsOpen] =
+    useState({
+      isOpen: false,
+      data: null,
+    });
+  const [buyTokensModalWindowIsOpen, setBuyTokensModalWindowIsOpen] = useState(
+    {
+      isOpen: false,
+      data: null,
+    },
+  );
+  const [buyFirstTokensModalWindowIsOpen, setFirstBuyTokensModalWindowIsOpen] =
+    useState(false);
+  const [closeOrderModalWindowIsOpen, setCloseOrderModalWindowIsOpen] =
     useState(false);
   const router = useRouter();
   const { coinId } = router.query;
@@ -51,18 +61,79 @@ export default function Coin() {
     onLoadOrders();
   }, [onLoadOrders]);
 
-  // const onCloseCreateOrderModalWindow = useCallback(() => {
-  //   setCreateOrderModalWindowIsOpen({
-  //     isOpen: false,
-  //     data: null,
-  //   });
-  // }, []);
-
-  // const onApplyCreateOrderModalWindow = useCallback(() => {}, []);
+  const onCloseSellTokensModalWindow = useCallback(() => {
+    setSellTokensModalWindowIsOpen({
+      isOpen: false,
+      data: null,
+    });
+  }, []);
 
   const onCloseBuyTokensModalWindow = useCallback(() => {
-    setBuyTokensModalWindowIsOpen(false);
+    setBuyTokensModalWindowIsOpen({
+      isOpen: false,
+      data: null,
+    });
   }, []);
+
+  const onCloseFirstBuyTokensModalWindow = useCallback(() => {
+    setFirstBuyTokensModalWindowIsOpen(false);
+  }, []);
+
+  const getOrderPartActionButton = (order, orderPart) => {
+    if (
+      order.status === orderStatuses.buyInProgress ||
+      order.status === orderStatuses.sellInProgress
+    ) {
+      return (
+        <button
+          onClick={() => setCloseOrderModalWindowIsOpen(true)}
+          className='text-xs font-bold text-blue-500 hover:text-blue-600'
+        >
+          Close order
+        </button>
+      );
+    }
+
+    if (
+      order.status === orderStatuses.buyDone &&
+      orderPart.status === orderPartStatuses.filled
+    ) {
+      return (
+        <button
+          className='text-xs font-bold text-blue-500 hover:text-blue-600'
+          onClick={() =>
+            setBuyTokensModalWindowIsOpen({
+              isOpen: true,
+              data: orderPart,
+            })
+          }
+        >
+          Sell tokens
+        </button>
+      );
+    }
+
+    if (
+      order.status === orderStatuses.sellDone &&
+      orderPart.status === orderPartStatuses.filled
+    ) {
+      return (
+        <button
+          onClick={() =>
+            setBuyTokensModalWindowIsOpen({
+              isOpen: true,
+              data: orderPart,
+            })
+          }
+          className='text-xs font-bold text-blue-500 hover:text-blue-600'
+        >
+          Buy tokens
+        </button>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <>
@@ -70,7 +141,7 @@ export default function Coin() {
         <Header>
           <Button
             intent='primary'
-            onClick={() => setBuyTokensModalWindowIsOpen(true)}
+            onClick={() => setFirstBuyTokensModalWindowIsOpen(true)}
           >
             Buy {data?.coin.coin}
           </Button>
@@ -115,10 +186,10 @@ export default function Coin() {
             </thead>
 
             <tbody>
-              {data?.coin.orders.map((transaction, transactionIndex) => (
-                <Fragment key={transaction.id}>
-                  {transaction?.orderParts.length !== 0
-                    ? transaction?.orderParts.map((orderPart, index) => {
+              {data?.coin.orders.map((order, transactionIndex) => (
+                <Fragment key={order.id}>
+                  {order?.orderParts.length !== 0
+                    ? order?.orderParts.map((orderPart, index) => {
                         return (
                           <tr
                             key={orderPart.id}
@@ -130,10 +201,10 @@ export default function Coin() {
                           >
                             {index === 0 ? (
                               <td
-                                rowSpan={transaction.orderParts.length}
+                                rowSpan={order.orderParts.length}
                                 className='p-2 border-r border-b text-xs'
                               >
-                                {getOrderStatusLabel(transaction.status)}
+                                {getOrderStatusLabel(order.status)}
                               </td>
                             ) : null}
                             <td className='p-2 border-b border-r text-xs'>
@@ -158,9 +229,7 @@ export default function Coin() {
                               {getOrderSideLabel(orderPart.side)}
                             </td>
                             <td className='p-2 border-l border-b text-xs'>
-                              <button className='text-xs font-bold text-blue-500 hover:text-blue-600'>
-                                Sell tokens
-                              </button>
+                              {getOrderPartActionButton(order, orderPart)}
                             </td>
                           </tr>
                         );
@@ -172,36 +241,61 @@ export default function Coin() {
           </table>
         ) : null}
       </main>
-      {/* <ModalWindow
-        isOpen={createOrderModalWindowIsOpen.isOpen}
-        msgTitle='Create order'
-      >
-        <ModalWindowBodyCreateOrder
-          oneCoinPrice={Number(
-            createOrderModalWindowIsOpen.data?.myTrade.price
-          )}
-          orderPrice={Number(
-            createOrderModalWindowIsOpen.data?.myTrade.quoteQty
-          )}
-          orderCommission={Number(
-            createOrderModalWindowIsOpen.data?.myTrade.commission
-          )}
-          msgBtnClose='Close'
-          msgBtnApply='Create order'
-          onClose={onCloseCreateOrderModalWindow}
-          onApply={onApplyCreateOrderModalWindow}
-        />
-      </ModalWindow> */}
+      <ModalWindow isOpen={closeOrderModalWindowIsOpen} msgTitle='Close order'>
+        <>
+          <p className='text-small text-xs font-bold mb-4'>
+            You are want to close order. Are you sure?
+          </p>
+          <div className='text-right'>
+            <Button
+              intent='default'
+              onClick={() => setCloseOrderModalWindowIsOpen(false)}
+            >
+              Close
+            </Button>
+            <Button intent='danger' className='ml-4'>
+              Close order
+            </Button>
+          </div>
+        </>
+      </ModalWindow>
       <ModalWindow
-        isOpen={buyTokensModalWindowIsOpen}
-        msgTitle={`Buy ${data?.coin.coin}`}
+        isOpen={sellTokensModalWindowIsOpen.isOpen}
+        msgTitle={`Sell ${data?.coin.coin}`}
       >
+        <ModalWindowBodySellCoins
+          coin={data?.coin.coin}
+          oneCoinPrice={Number(sellTokensModalWindowIsOpen.data?.oneCoinPrice)}
+          orderPrice={Number(sellTokensModalWindowIsOpen.data?.fullPrice)}
+          coinsAmount={Number(sellTokensModalWindowIsOpen.data?.coinsAmount)}
+          msgBtnClose='Close'
+          msgBtnApply='Sell tokens'
+          onLoadOrders={onLoadOrders}
+          onClose={onCloseSellTokensModalWindow}
+        />
+      </ModalWindow>
+      <ModalWindow isOpen={buyTokensModalWindowIsOpen.isOpen} msgTitle={`Buy ${data?.coin.coin}`}>
         <ModalWindowBodyBuyCoins
+          coin={data?.coin.coin}
+          oneCoinPrice={Number(buyTokensModalWindowIsOpen.data?.oneCoinPrice)}
+          orderPrice={Number(buyTokensModalWindowIsOpen.data?.fullPrice)}
+          coinsAmount={Number(buyTokensModalWindowIsOpen.data?.coinsAmount)}
+          msgBtnClose='Close'
+          msgBtnApply='Buy tokens'
+          onLoadOrders={onLoadOrders}
+          onClose={onCloseBuyTokensModalWindow}
+        />
+      </ModalWindow>
+      <ModalWindow
+        isOpen={buyFirstTokensModalWindowIsOpen}
+        msgTitle={`Buy first ${data?.coin.coin}`}
+      >
+        <ModalWindowBodyFirstBuyCoins
           coin={data?.coin.coin}
           msgBtnClose='Close'
           msgBtnApply='Buy coins'
           onLoadOrders={onLoadOrders}
-          onClose={onCloseBuyTokensModalWindow}
+          onClose={onCloseFirstBuyTokensModalWindow}
         />
       </ModalWindow>
     </>

@@ -8,9 +8,9 @@ import {
 export const getOrderSideLabel = (key) => {
   switch (key) {
     case orderSides.sell:
-      return 'Sell';
+      return '⬆️ Sell';
     case orderSides.buy:
-      return 'Buy';
+      return '⬇️ Buy';
     default:
       return 'Side label not found';
   }
@@ -40,11 +40,11 @@ export const getOrderTypeLabel = (key) => {
 export const getOrderPartStatusLabel = (key) => {
   switch (key) {
     case orderPartStatuses.new:
-      return 'New';
+      return '🆕 New';
     case orderPartStatuses.partiallyFilled:
       return 'Partially filled';
     case orderPartStatuses.filled:
-      return 'Filled';
+      return '✅ Filled';
     case orderPartStatuses.canceled:
       return 'Canceled';
     case orderPartStatuses.pendingCancel:
