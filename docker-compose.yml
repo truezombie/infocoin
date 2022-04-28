@@ -1,35 +1,14 @@
-version: "3.3"
-
-services:
-  db:
-    container_name: db
-    image: postgres:13.4
-    restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_DB: ${DB_NAME}
-      PG_DATA: /var/lib/postgresql/data
-    ports:
-      - ${DB_PORT}:5432
-    volumes:
-      - db:/var/lib/postgresql/data
+version: '3.3' #This denotes that we are using version 3 of Docker Compose
+services: #This section defines all the different containers we will create.
+  infocoin: #This is the name of our Nextjs application.
+    build: #This specifies the location of our Dockerfile
+      context: . #This specifies the location of our Dockerfile
+      dockerfile: ./Dockerfile.app
+    ports: #This is used to map the container’s ports to the host machine.
+      - "3000:3000"
   cron:
     container_name: cron
     image: cron
-    network_mode: host
     build:
-      # context: ./
-      # target: development
-      dockerfile: ./Dockerfile
-    # volumes:
-      # - ./:/usr/src/app
-      # - /usr/src/app/node_modules
-    # ports:
-      # - ${SERVER_PORT}:3000
-    # networks:
-      # - true-cards-application-api-network
-    # command: npm run start:dev
-    # restart: unless-stopped
-volumes:
-  db:
+      context: .
+      dockerfile: ./Dockerfile.cron

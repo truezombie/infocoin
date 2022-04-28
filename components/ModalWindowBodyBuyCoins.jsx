@@ -51,9 +51,9 @@ export const ModalWindowBodyBuyCoins = ({
       },
       body: JSON.stringify({
         symbol: coin,
-        side: orderSides.sell,
+        side: orderSides.buy,
         type: orderTypes.limit,
-        quantity: coinsAmount,
+        // quantity: coinsAmount,
         price: oneCoinWillCost,
       }),
     })

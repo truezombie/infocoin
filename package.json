@@ -11,6 +11,8 @@
     "prisma:format": "npx prisma format",
     "prisma:push": "npx prisma db push",
     "prisma:studio": "npx prisma studio",
+    "dev:up": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up",
+    "prod:up": "docker-compose -f docker-compose.yml -f docker-compose.prod.yml up",
     "lint": "next lint"
   },
   "dependencies": {

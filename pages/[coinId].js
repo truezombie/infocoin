@@ -13,6 +13,7 @@ import {
   Header,
 } from '../components';
 import { useRequestManager } from '../hooks/useResponseChecker';
+import { useModalWindow } from '../hooks/useModalWindow';
 import { getDateFromTimestamp } from '../utils/time';
 import { orderStatuses, orderPartStatuses } from '../utils/constants';
 import {
@@ -24,23 +25,22 @@ import {
 
 export default function Coin() {
   const { data, onCheckResponse } = useRequestManager();
-  // const [coinData, setCoinData] = useState(null);
   const [transactionsIsLoading, setTransactionsIsLoading] = useState(false);
-  const [sellTokensModalWindowIsOpen, setSellTokensModalWindowIsOpen] =
-    useState({
-      isOpen: false,
-      data: null,
-    });
-  const [buyTokensModalWindowIsOpen, setBuyTokensModalWindowIsOpen] = useState(
-    {
-      isOpen: false,
-      data: null,
-    },
-  );
+  const [
+    sellTokensModalWindowIsOpen,
+    setSellTokensModalWindowIsOpen,
+    onCloseSellTokensModalWindow,
+  ] = useModalWindow();
+  const [
+    buyTokensModalWindowIsOpen,
+    setBuyTokensModalWindowIsOpen,
+    onCloseBuyTokensModalWindow,
+  ] = useModalWindow();
   const [buyFirstTokensModalWindowIsOpen, setFirstBuyTokensModalWindowIsOpen] =
     useState(false);
   const [closeOrderModalWindowIsOpen, setCloseOrderModalWindowIsOpen] =
     useState(false);
+
   const router = useRouter();
   const { coinId } = router.query;
 
@@ -60,20 +60,6 @@ export default function Coin() {
   useEffect(() => {
     onLoadOrders();
   }, [onLoadOrders]);
-
-  const onCloseSellTokensModalWindow = useCallback(() => {
-    setSellTokensModalWindowIsOpen({
-      isOpen: false,
-      data: null,
-    });
-  }, []);
-
-  const onCloseBuyTokensModalWindow = useCallback(() => {
-    setBuyTokensModalWindowIsOpen({
-      isOpen: false,
-      data: null,
-    });
-  }, []);
 
   const onCloseFirstBuyTokensModalWindow = useCallback(() => {
     setFirstBuyTokensModalWindowIsOpen(false);
@@ -102,7 +88,7 @@ export default function Coin() {
         <button
           className='text-xs font-bold text-blue-500 hover:text-blue-600'
           onClick={() =>
-            setBuyTokensModalWindowIsOpen({
+            setSellTokensModalWindowIsOpen({
               isOpen: true,
               data: orderPart,
             })
@@ -191,47 +177,58 @@ export default function Coin() {
                   {order?.orderParts.length !== 0
                     ? order?.orderParts.map((orderPart, index) => {
                         return (
-                          <tr
-                            key={orderPart.id}
-                            className={
-                              transactionIndex % 2 === 0
-                                ? 'bg-white'
-                                : 'bg-gray-50'
-                            }
-                          >
-                            {index === 0 ? (
-                              <td
-                                rowSpan={order.orderParts.length}
-                                className='p-2 border-r border-b text-xs'
-                              >
-                                {getOrderStatusLabel(order.status)}
+                          <>
+                            <tr
+                              key={orderPart.id}
+                              className={
+                                transactionIndex % 2 === 0
+                                  ? 'bg-white'
+                                  : 'bg-gray-50'
+                              }
+                            >
+                              {index === 0 ? (
+                                <td
+                                  rowSpan={order.orderParts.length}
+                                  className='p-2 border-r border-b text-xs'
+                                >
+                                  {getOrderStatusLabel(order.status)}
+                                </td>
+                              ) : null}
+                              <td className='p-2 border-b border-r text-xs'>
+                                {getDateFromTimestamp(orderPart.transactTime)}
                               </td>
-                            ) : null}
-                            <td className='p-2 border-b border-r text-xs'>
-                              {getDateFromTimestamp(orderPart.transactTime)}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {orderPart.coinsAmount}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {orderPart.fullPrice}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {orderPart.oneCoinPrice}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {getOrderPartStatusLabel(orderPart.status)}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {getOrderTypeLabel(orderPart.type)}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {getOrderSideLabel(orderPart.side)}
-                            </td>
-                            <td className='p-2 border-l border-b text-xs'>
-                              {getOrderPartActionButton(order, orderPart)}
-                            </td>
-                          </tr>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {orderPart.coinsAmount}
+                              </td>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {orderPart.fullPrice}
+                              </td>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {orderPart.oneCoinPrice}
+                              </td>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {getOrderPartStatusLabel(orderPart.status)}
+                              </td>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {getOrderTypeLabel(orderPart.type)}
+                              </td>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {getOrderSideLabel(orderPart.side)}
+                              </td>
+                              <td className='p-2 border-l border-b text-xs'>
+                                {getOrderPartActionButton(order, orderPart)}
+                              </td>
+                            </tr>
+                            {
+                              order.orderParts.length >= 1 ? (
+                                <tr>
+                                  <td className='p-2 border-b border-r text-xs' colSpan={3} />
+                                  <td className='p-2 border-b border-r text-xs font-bold bg-green-50'>Earned: 300</td>
+                                  <td className='p-2 border-b text-xs' colSpan={5} />
+                                </tr>
+                              ) : null
+                            }
+                          </>
                         );
                       })
                     : null}
@@ -274,7 +271,10 @@ export default function Coin() {
           onClose={onCloseSellTokensModalWindow}
         />
       </ModalWindow>
-      <ModalWindow isOpen={buyTokensModalWindowIsOpen.isOpen} msgTitle={`Buy ${data?.coin.coin}`}>
+      <ModalWindow
+        isOpen={buyTokensModalWindowIsOpen.isOpen}
+        msgTitle={`Buy ${data?.coin.coin}`}
+      >
         <ModalWindowBodyBuyCoins
           coin={data?.coin.coin}
           oneCoinPrice={Number(buyTokensModalWindowIsOpen.data?.oneCoinPrice)}
