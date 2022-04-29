@@ -6,9 +6,9 @@ import {
   ApiResponseSuccess,
   ErrorData,
   RESPONSE_STATUSES,
-} from '../../utils/responses';
-import { postRequestGuardHof } from '../../utils/guards';
-import prisma from '../../lib/prisma';
+} from '../../../utils/responses';
+import { postRequestGuardHof } from '../../../utils/guards';
+import prisma from '../../../lib/prisma';
 
 async function getUserByEmail(email) {
   const user = await prisma.user.findUnique({

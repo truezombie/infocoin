@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
 }
 
 datasource db {
@@ -31,7 +32,7 @@ model Order {
   status     OrderStatus @default(BUY_IN_PROGRESS)
   orderParts OrderPart[]
   coin       Coin?       @relation(fields: [coinId], references: [id])
-  coinId     String?     @unique
+  coinId     String?
 }
 
 model OrderPart {

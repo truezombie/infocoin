@@ -177,58 +177,47 @@ export default function Coin() {
                   {order?.orderParts.length !== 0
                     ? order?.orderParts.map((orderPart, index) => {
                         return (
-                          <>
-                            <tr
-                              key={orderPart.id}
-                              className={
-                                transactionIndex % 2 === 0
-                                  ? 'bg-white'
-                                  : 'bg-gray-50'
-                              }
-                            >
-                              {index === 0 ? (
-                                <td
-                                  rowSpan={order.orderParts.length}
-                                  className='p-2 border-r border-b text-xs'
-                                >
-                                  {getOrderStatusLabel(order.status)}
-                                </td>
-                              ) : null}
-                              <td className='p-2 border-b border-r text-xs'>
-                                {getDateFromTimestamp(orderPart.transactTime)}
-                              </td>
-                              <td className='p-2 border-b border-r text-xs'>
-                                {orderPart.coinsAmount}
-                              </td>
-                              <td className='p-2 border-b border-r text-xs'>
-                                {orderPart.fullPrice}
-                              </td>
-                              <td className='p-2 border-b border-r text-xs'>
-                                {orderPart.oneCoinPrice}
-                              </td>
-                              <td className='p-2 border-b border-r text-xs'>
-                                {getOrderPartStatusLabel(orderPart.status)}
-                              </td>
-                              <td className='p-2 border-b border-r text-xs'>
-                                {getOrderTypeLabel(orderPart.type)}
-                              </td>
-                              <td className='p-2 border-b border-r text-xs'>
-                                {getOrderSideLabel(orderPart.side)}
-                              </td>
-                              <td className='p-2 border-l border-b text-xs'>
-                                {getOrderPartActionButton(order, orderPart)}
-                              </td>
-                            </tr>
-                            {
-                              order.orderParts.length >= 1 ? (
-                                <tr>
-                                  <td className='p-2 border-b border-r text-xs' colSpan={3} />
-                                  <td className='p-2 border-b border-r text-xs font-bold bg-green-50'>Earned: 300</td>
-                                  <td className='p-2 border-b text-xs' colSpan={5} />
-                                </tr>
-                              ) : null
+                          <tr
+                            key={orderPart.id}
+                            className={
+                              transactionIndex % 2 === 0
+                                ? 'bg-white'
+                                : 'bg-gray-50'
                             }
-                          </>
+                          >
+                            {index === 0 ? (
+                              <td
+                                rowSpan={order.orderParts.length}
+                                className='p-2 border-r border-b text-xs'
+                              >
+                                {getOrderStatusLabel(order.status)}
+                              </td>
+                            ) : null}
+                            <td className='p-2 border-b border-r text-xs'>
+                              {getDateFromTimestamp(orderPart.transactTime)}
+                            </td>
+                            <td className='p-2 border-b border-r text-xs'>
+                              {orderPart.coinsAmount}
+                            </td>
+                            <td className='p-2 border-b border-r text-xs'>
+                              {orderPart.fullPrice}
+                            </td>
+                            <td className='p-2 border-b border-r text-xs'>
+                              {orderPart.oneCoinPrice}
+                            </td>
+                            <td className='p-2 border-b border-r text-xs'>
+                              {getOrderPartStatusLabel(orderPart.status)}
+                            </td>
+                            <td className='p-2 border-b border-r text-xs'>
+                              {getOrderTypeLabel(orderPart.type)}
+                            </td>
+                            <td className='p-2 border-b border-r text-xs'>
+                              {getOrderSideLabel(orderPart.side)}
+                            </td>
+                            <td className='p-2 border-l border-b text-xs'>
+                              {getOrderPartActionButton(order, orderPart)}
+                            </td>
+                          </tr>
                         );
                       })
                     : null}

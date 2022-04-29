@@ -33,7 +33,6 @@ async function handler(req, res) {
     .status(200)
     .json(new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, {}));
   } catch (e) {
-    console.log(e);
     res.status(500).json(new ApiResponseError());
   }
 }

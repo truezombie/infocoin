@@ -73,6 +73,8 @@ async function handler(req, res) {
         },
       });
 
+      console.log(createdToken);
+
       await fillOpenedCoinOrders(createdToken);
 
       res
@@ -91,6 +93,7 @@ async function handler(req, res) {
         );
     }
   } catch (e) {
+    console.log(e);
     res.status(500).json(new ApiResponseError());
   }
 }

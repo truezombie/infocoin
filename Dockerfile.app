@@ -22,6 +22,7 @@ COPY . /usr/src/app
 
 #Execute commands in a new layer on top of the current image and commit the results
 RUN npm run build
+RUN npx prisma generate
 
 #Informs container runtime that the container listens on the specified network ports at runtime
 EXPOSE 3000
