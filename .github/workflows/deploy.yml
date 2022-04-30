@@ -15,7 +15,7 @@ on:
         required: true
 #2
 env:
-  REGISTRY: "registry.digitalocean.com"
+  REGISTRY: "registry.digitalocean.com/infocoin"
   IMAGE_NAME: "infocoin"
 
 #3
