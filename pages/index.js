@@ -79,7 +79,7 @@ export default function Home() {
                   </span>
                   <Link href={`/${userCoin.id}`}>
                     <a className='text-xs border-2 hover:border-blue-600 hover:text-blue-600 border-blue-500 text-blue-500 font-bold px-2 py-2 inline-block rounded-md'>
-                      Trade
+                      Manage
                     </a>
                   </Link>
                 </div>
