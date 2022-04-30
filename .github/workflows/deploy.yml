@@ -5,7 +5,7 @@ name: CI
 on:
   # Triggers the workflow on push events but only for the master branch
   push:
-    branches: [ master ]
+    branches: [ main ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -15,8 +15,8 @@ on:
         required: true
 #2
 env:
-  REGISTRY: "your-digitalocean-registry-container-url"
-  IMAGE_NAME: "your-docker-image-name"
+  REGISTRY: "registry.digitalocean.com/infocoin"
+  IMAGE_NAME: "infocoin"
 
 #3
 jobs:
@@ -27,7 +27,8 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Build container image
-        run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
+        # run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
+        run: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
