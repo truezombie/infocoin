@@ -49,8 +49,8 @@ async function handler(req, res) {
   } else {
     const { id, nickName } = user;
 
-    const token = jwt.sign({ id, nickName }, process.env.JWT_SALT, {
-      expiresIn: process.env.JWT_TTL,
+    const token = jwt.sign({ id, nickName }, process.env.APP_JWT_SALT, {
+      expiresIn: process.env.APP_JWT_TTL,
     });
 
     res.setHeader(

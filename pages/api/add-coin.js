@@ -51,7 +51,7 @@ async function handler(req, res) {
 
     const tokenPayload = await jwt.verify(
       req.cookies?.token || '',
-      process.env.JWT_SALT,
+      process.env.APP_JWT_SALT,
     );
     const allCoinsRaw = await fetch(
       `https://api.binance.com/sapi/v1/capital/config/getall?${query}&signature=${signature}`,

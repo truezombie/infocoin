@@ -10,7 +10,7 @@ import {
 
 export function localhostRequestGuardHof(handler) {
   return (req, res) => {
-    if (!req.headers.host.includes(process.env.LOCALHOST_URL)) {
+    if (!req.headers.host.includes(process.env.APP_LOCALHOST_URL)) {
       res
         .status(405)
         .send(
@@ -40,7 +40,7 @@ export function postRequestGuardHof(handler) {
 export function authGuardHof(handler) {
   return async (req, res) => {
     try {
-      await jwt.verify(req.cookies?.token || '', process.env.JWT_SALT);
+      await jwt.verify(req.cookies?.token || '', process.env.APP_JWT_SALT);
 
       handler(req, res);
     } catch (e) {
