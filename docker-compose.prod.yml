@@ -2,7 +2,7 @@ version: '3.8'
 services:
   infocoin:
     command: start
-    environment:
+    env:
       APP_TELEGRAM_CHAR_ID=${{secrets.APP_TELEGRAM_CHAR_ID}}
       APP_TELEGRAM_BOT_TOKEN=${{secrets.APP_TELEGRAM_BOT_TOKEN}}
       APP_BINANCE_API_KEY=${{secrets.APP_BINANCE_API_KEY}}
