@@ -35,8 +35,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          # key: ${{ secrets.SSHKEY }}
-          # passphrase: ${{ secrets.PASSPHRASE }}
           envs: IMAGE_INFOCOIN_APP,REGISTRY,{{ secrets.DIGITALOCEAN_ACCESS_TOKEN }},GITHUB_SHA
           script: |
             cd Projects/infocoin
@@ -51,4 +49,5 @@ jobs:
             echo APP_JWT_SALT=${{ secrets.APP_JWT_SALT }} >> .env
             echo APP_JWT_TTL=${{ secrets.APP_JWT_TTL }} >> .env
             git pull
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
