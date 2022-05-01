@@ -18,6 +18,14 @@ env:
   REGISTRY: "registry.digitalocean.com/infocoin"
   IMAGE_INFOCOIN_APP: "infocoin-app"
   IMAGE_INFOCOIN_CRON: "infocoin-cron"
+  APP_TELEGRAM_CHAR_ID: ${{ secrets.APP_TELEGRAM_CHAR_ID }}
+  APP_TELEGRAM_BOT_TOKEN: ${{ secrets.APP_TELEGRAM_BOT_TOKEN }}
+  APP_BINANCE_API_KEY: ${{ secrets.APP_BINANCE_API_KEY }}
+  APP_BINANCE_API_SECRET: ${{ secrets.APP_BINANCE_API_SECRET }}
+  APP_LOCALHOST_URL: ${{ secrets.APP_LOCALHOST_URL }}
+  APP_DB_URL: ${{ secrets.APP_DB_URL }}
+  APP_JWT_SALT: ${{ secrets.APP_JWT_SALT }}
+  APP_JWT_TTL: ${{ secrets.APP_JWT_TTL }}
 
 #3
 jobs:
@@ -75,6 +83,14 @@ jobs:
             docker rm $(echo $IMAGE_INFOCOIN_CRON)
             # Run a new container from a new image
             docker run -d \
+            --env APP_TELEGRAM_CHAR_ID=$(echo $APP_TELEGRAM_CHAR_ID) \
+            --env APP_TELEGRAM_BOT_TOKEN=$(echo $APP_TELEGRAM_BOT_TOKEN) \
+            --env APP_BINANCE_API_KEY=$(echo $APP_BINANCE_API_KEY) \
+            --env APP_BINANCE_API_SECRET=$(echo $APP_BINANCE_API_SECRET) \
+            --env APP_LOCALHOST_URL=$(echo $APP_LOCALHOST_URL) \
+            --env APP_DB_URL=$(echo $APP_DB_URL) \
+            --env APP_JWT_SALT=$(echo $APP_JWT_SALT) \
+            --env APP_JWT_TTL=$(echo $APP_JWT_TTL) \
             --restart always \
             --name $(echo $IMAGE_INFOCOIN_APP) \
             $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP):$(echo $GITHUB_SHA | head -c7)

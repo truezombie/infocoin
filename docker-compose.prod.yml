@@ -2,12 +2,3 @@ version: '3.8'
 services:
   infocoin:
     command: start
-    env:
-      APP_TELEGRAM_CHAR_ID=${{secrets.APP_TELEGRAM_CHAR_ID}}
-      APP_TELEGRAM_BOT_TOKEN=${{secrets.APP_TELEGRAM_BOT_TOKEN}}
-      APP_BINANCE_API_KEY=${{secrets.APP_BINANCE_API_KEY}}
-      APP_BINANCE_API_SECRET=${{secrets.APP_BINANCE_API_SECRET}}
-      APP_LOCALHOST_URL=${{secrets.APP_LOCALHOST_URL}}
-      APP_DB_URL=${{secrets.APP_DB_URL}}
-      APP_JWT_SALT=${{secrets.APP_JWT_SALT}}
-      APP_JWT_TTL=${{secrets.APP_JWT_TTL}}
