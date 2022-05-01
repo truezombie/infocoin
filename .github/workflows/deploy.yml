@@ -59,10 +59,10 @@ jobs:
         run: if [ ! -z "$(doctl registry repository list | grep "$(echo $IMAGE_INFOCOIN_CRON)")" ]; then doctl registry repository delete-manifest $(echo $IMAGE_INFOCOIN_CRON) $(doctl registry repository list-tags $(echo $IMAGE_INFOCOIN_CRON) | grep -o "sha.*") --force; else echo "No repository"; fi
 
       - name: Push image app to DigitalOcean Container Registry
-        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP):$(echo $GITHUB_SHA | head -c7)
+        run: docker push $(echo $IMAGE_INFOCOIN_APP)
 
       - name: Push image cron to DigitalOcean Container Registry
-        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_CRON):$(echo $GITHUB_SHA | head -c7)
+        run: docker push $(echo $IMAGE_INFOCOIN_CRON)
         
   deploy:
     runs-on: ubuntu-latest
@@ -99,9 +99,9 @@ jobs:
             --env APP_JWT_TTL=$(echo $APP_JWT_TTL) \
             --restart always \
             --name $(echo $IMAGE_INFOCOIN_APP) \
-            $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP):$(echo $GITHUB_SHA | head -c7)
+            $(echo $IMAGE_INFOCOIN_APP)
             # Run a new container from a new image
             docker run -d \
             --restart always \
             --name $(echo $IMAGE_INFOCOIN_CRON) \
-            $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_CRON):$(echo $GITHUB_SHA | head -c7)
+            $(echo $IMAGE_INFOCOIN_CRON)
