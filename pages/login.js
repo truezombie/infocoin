@@ -63,7 +63,7 @@ export default function Login() {
         Infocoin
       </h1>
       <h3 className='text-md mb-4 font-extrabold text-center text-slate-500 mt-0.5'>
-        Login
+        Login ----
       </h3>
       <div className='py-4 px-4 bg-white rounded-md shadow-sm border relative'>
         {error ? (
