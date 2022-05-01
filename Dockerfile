@@ -20,13 +20,12 @@ RUN npm install
 ##Copy new files or directories into the filesystem of the container
 COPY . /usr/src/app
 
+RUN npx prisma generate && npm run build
+
 #Informs container runtime that the container listens on the specified network ports at runtime
 EXPOSE 3000
 
-#Allows you to configure a container that will run as an executable
-# ENTRYPOINT ["npm", "run"]
-#Execute commands in a new layer on top of the current image and commit the results
-RUN npx prisma generate && npm run build && npm run start
+ENTRYPOINT ["npm", "run"]
 
 FROM ubuntu:latest as infocoin-cron
 

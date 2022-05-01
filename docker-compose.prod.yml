@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   infocoin:
-    command: start
+    command: npm run start
     env:
       APP_TELEGRAM_CHAR_ID: ${{secrets.APP_TELEGRAM_CHAR_ID}}
       APP_TELEGRAM_BOT_TOKEN: ${{secrets.APP_TELEGRAM_BOT_TOKEN}}
