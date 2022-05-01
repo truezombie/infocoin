@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: TODO
-        run: echo "TODO: tests"
+      - run: echo "TODO: tests"
     # steps:
     #   - name: Checkout the repo 
     #     uses: actions/checkout@v2
