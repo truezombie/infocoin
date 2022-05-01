@@ -46,8 +46,8 @@ jobs:
       #   with:
       #     token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
     
-      - name: TODO: tests
-        run: echo "TODO: tests"
+      - name: TODO tests
+        run: echo "TODO tests"
       
       # - name: Remove all old app images
       #   run: if [ ! -z "$(doctl registry repository list | grep "$(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP)")" ]; then doctl registry repository delete-manifest $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP) $(doctl registry repository list-tags $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP) | grep -o "sha.*") --force; else echo "No repository"; fi
