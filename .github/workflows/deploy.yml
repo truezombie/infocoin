@@ -75,16 +75,14 @@ jobs:
             docker stop $(echo $IMAGE_INFOCOIN_APP)
             # Remove old container
             docker rm $(echo $IMAGE_INFOCOIN_APP)
+            touch .env
+            echo APP_TELEGRAM_CHAR_ID=${{ secrets.APP_TELEGRAM_CHAR_ID }} >> .env
+            echo APP_TELEGRAM_BOT_TOKEN=${{ secrets.APP_TELEGRAM_BOT_TOKEN }} >> .env
+            echo APP_BINANCE_API_KEY=${{ secrets.APP_BINANCE_API_KEY }} >> .env
+            echo APP_BINANCE_API_SECRET=${{ secrets.APP_BINANCE_API_SECRET }} >> .env
+            echo APP_LOCALHOST_URL=${{ secrets.APP_LOCALHOST_URL }} >> .env
+            echo APP_DB_URL=${{ secrets.APP_DB_URL }} >> .env
+            echo APP_JWT_SALT=${{ secrets.APP_DB_URL }} >> .env
+            echo APP_JWT_TTL=${{ secrets.APP_JWT_TTL }} >> .env
             # Run a new container from a new image
-            docker run -d \
-            --env APP_TELEGRAM_CHAR_ID=$(echo $APP_TELEGRAM_CHAR_ID) \
-            --env APP_TELEGRAM_BOT_TOKEN=$(echo $APP_TELEGRAM_BOT_TOKEN) \
-            --env APP_BINANCE_API_KEY=$(echo $APP_BINANCE_API_KEY) \
-            --env APP_BINANCE_API_SECRET=$(echo $APP_BINANCE_API_SECRET) \
-            --env APP_LOCALHOST_URL=$(echo $APP_LOCALHOST_URL) \
-            --env APP_DB_URL=$(echo $APP_DB_URL) \
-            --env APP_JWT_SALT=$(echo $APP_JWT_SALT) \
-            --env APP_JWT_TTL=$(echo $APP_JWT_TTL) \
-            --restart always \
-            --name $(echo $IMAGE_INFOCOIN_APP) \
-            $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP)
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml up

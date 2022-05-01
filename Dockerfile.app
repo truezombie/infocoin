@@ -23,6 +23,6 @@ COPY . /usr/src/app
 #Informs container runtime that the container listens on the specified network ports at runtime
 EXPOSE 3000
 
-RUN npx prisma generate && npm run build && npm run start
+RUN npx prisma generate && npm run build 
 
-# ENTRYPOINT ["npm", "run"]
+ENTRYPOINT ["npm", "run"]
