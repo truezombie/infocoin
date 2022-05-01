@@ -20,9 +20,9 @@ RUN npm install
 ##Copy new files or directories into the filesystem of the container
 COPY . /usr/src/app
 
-RUN npx prisma generate && npm run build
-
 #Informs container runtime that the container listens on the specified network ports at runtime
 EXPOSE 3000
 
-ENTRYPOINT ["npm", "run"]
+RUN npx prisma generate && npm run build && npm run start
+
+# ENTRYPOINT ["npm", "run"]
