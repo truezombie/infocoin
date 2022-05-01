@@ -16,7 +16,8 @@ on:
 #2
 env:
   REGISTRY: "registry.digitalocean.com/infocoin"
-  IMAGE_NAME: "infocoin"
+  IMAGE_INFOCOIN_APP: "infocoin-app"
+  IMAGE_INFOCOIN_CRON: "infocoin-cron"
 
 #3
 jobs:
@@ -27,7 +28,7 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Build container image
-        run: docker-compose.yml -f docker-compose.prod.yml build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+        run: docker-compose.yml -f docker-compose.prod.yml build
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -37,11 +38,17 @@ jobs:
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 600
       
-      - name: Remove all old images
-        run: if [ ! -z "$(doctl registry repository list | grep "$(echo $IMAGE_NAME)")" ]; then doctl registry repository delete-manifest $(echo $IMAGE_NAME) $(doctl registry repository list-tags $(echo $IMAGE_NAME) | grep -o "sha.*") --force; else echo "No repository"; fi
+      - name: Remove all old app images
+        run: if [ ! -z "$(doctl registry repository list | grep "$(echo $IMAGE_INFOCOIN_APP)")" ]; then doctl registry repository delete-manifest $(echo $IMAGE_INFOCOIN_APP) $(doctl registry repository list-tags $(echo $IMAGE_INFOCOIN_APP) | grep -o "sha.*") --force; else echo "No repository"; fi
 
-      - name: Push image to DigitalOcean Container Registry
-        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+      - name: Remove all old cron images
+        run: if [ ! -z "$(doctl registry repository list | grep "$(echo $IMAGE_INFOCOIN_CRON)")" ]; then doctl registry repository delete-manifest $(echo $IMAGE_INFOCOIN_CRON) $(doctl registry repository list-tags $(echo $IMAGE_INFOCOIN_CRON) | grep -o "sha.*") --force; else echo "No repository"; fi
+
+      - name: Push image app to DigitalOcean Container Registry
+        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP):$(echo $GITHUB_SHA | head -c7)
+
+      - name: Push image cron to DigitalOcean Container Registry
+        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_CRON):$(echo $GITHUB_SHA | head -c7)
         
   deploy:
     runs-on: ubuntu-latest
@@ -56,16 +63,23 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           # key: ${{ secrets.SSHKEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          envs: IMAGE_NAME,REGISTRY,{{ secrets.DIGITALOCEAN_ACCESS_TOKEN }},GITHUB_SHA
+          envs: IMAGE_INFOCOIN_APP,IMAGE_INFOCOIN_CRON,REGISTRY,{{ secrets.DIGITALOCEAN_ACCESS_TOKEN }},GITHUB_SHA
           script: |
             # Login to registry
             docker login -u ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} registry.digitalocean.com
             # Stop running container
-            docker stop $(echo $IMAGE_NAME)
+            docker stop $(echo $IMAGE_INFOCOIN_APP)
+            docker stop $(echo $IMAGE_INFOCOIN_CRON)
             # Remove old container
-            docker rm $(echo $IMAGE_NAME)
+            docker rm $(echo $IMAGE_INFOCOIN_APP)
+            docker rm $(echo $IMAGE_INFOCOIN_CRON)
             # Run a new container from a new image
             docker run -d \
             --restart always \
-            --name $(echo $IMAGE_NAME) \
-            $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+            --name $(echo $IMAGE_INFOCOIN_APP) \
+            $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP):$(echo $GITHUB_SHA | head -c7)
+            # Run a new container from a new image
+            docker run -d \
+            --restart always \
+            --name $(echo $IMAGE_INFOCOIN_CRON) \
+            $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_CRON):$(echo $GITHUB_SHA | head -c7)
