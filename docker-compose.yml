@@ -6,12 +6,14 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.app
+    restart: always
     ports:
       - "3000:3000"
 
   cron:
     container_name: cron
     image: cron
+    restart: always
     build:
       context: .
       dockerfile: ./Dockerfile.cron
