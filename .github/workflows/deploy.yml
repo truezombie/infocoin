@@ -39,10 +39,10 @@ jobs:
       #   run: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 
       - name: Build image infocoin-app
-        run: docker build . --file Dockerfile.app --tag $(echo $IMAGE_INFOCOIN_APP) --label "runnumber=${GITHUB_RUN_ID}"
+        run: docker build . --file Dockerfile.app --tag $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP) --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Build image infocoin-cron
-        run: docker build . --file Dockerfile.cron --tag $(echo $IMAGE_INFOCOIN_CRON) --label "runnumber=${GITHUB_RUN_ID}"
+        run: docker build . --file Dockerfile.cron --tag $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_CRON) --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -53,10 +53,10 @@ jobs:
         run: doctl registry login --expiry-seconds 600
       
       - name: Remove all old app images
-        run: if [ ! -z "$(doctl registry repository list | grep "$(echo $IMAGE_INFOCOIN_APP)")" ]; then doctl registry repository delete-manifest $(echo $IMAGE_INFOCOIN_APP) $(doctl registry repository list-tags $(echo $IMAGE_INFOCOIN_APP) | grep -o "sha.*") --force; else echo "No repository"; fi
+        run: if [ ! -z "$(doctl registry repository list | grep "$(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP)")" ]; then doctl registry repository delete-manifest $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP) $(doctl registry repository list-tags $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP) | grep -o "sha.*") --force; else echo "No repository"; fi
 
       - name: Remove all old cron images
-        run: if [ ! -z "$(doctl registry repository list | grep "$(echo $IMAGE_INFOCOIN_CRON)")" ]; then doctl registry repository delete-manifest $(echo $IMAGE_INFOCOIN_CRON) $(doctl registry repository list-tags $(echo $IMAGE_INFOCOIN_CRON) | grep -o "sha.*") --force; else echo "No repository"; fi
+        run: if [ ! -z "$(doctl registry repository list | grep "$(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_CRON)")" ]; then doctl registry repository delete-manifest $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_CRON) $(doctl registry repository list-tags $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_CRON) | grep -o "sha.*") --force; else echo "No repository"; fi
 
       - name: Push image app to DigitalOcean Container Registry
         run: docker push $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP)
@@ -98,9 +98,9 @@ jobs:
             --env APP_JWT_TTL=$(echo $APP_JWT_TTL) \
             --restart always \
             --name $(echo $IMAGE_INFOCOIN_APP) \
-            $(echo $IMAGE_INFOCOIN_APP)
+            $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_APP)
             # Run a new container from a new image
             docker run -d \
             --restart always \
             --name $(echo $IMAGE_INFOCOIN_CRON) \
-            $(echo $IMAGE_INFOCOIN_CRON)
+            $(echo $REGISTRY)/$(echo $IMAGE_INFOCOIN_CRON)
