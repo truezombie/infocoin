@@ -1,4 +1,4 @@
-FROM node:alpine as development
+FROM node:alpine
 
 RUN mkdir -p /usr/src/app
 

@@ -8,3 +8,10 @@ services:
       dockerfile: ./Dockerfile.app
     ports:
       - "3000:3000"
+
+  cron:
+    container_name: cron
+    image: cron
+    build:
+      context: .
+      dockerfile: ./Dockerfile.cron

@@ -6,9 +6,3 @@ services:
         - .:/usr/src/app
         - /usr/src/app/node_modules
         - /usr/src/app/.next
-  cron:
-    container_name: cron
-    image: cron
-    build:
-      context: .
-      dockerfile: ./Dockerfile.cron
