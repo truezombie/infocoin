@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Build container image
-        run: docker-compose.yml -f docker-compose.prod.yml build
+        run: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
