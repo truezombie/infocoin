@@ -5,8 +5,7 @@ services:
   infocoin:
     build:
       context: .
-      target: infocoin-app
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.app
     ports:
       - "3000:3000"
 
@@ -15,5 +14,4 @@ services:
     image: cron
     build:
       context: .
-      target: infocoin-cron
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.cron

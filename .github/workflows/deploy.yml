@@ -35,8 +35,14 @@ jobs:
       - name: Checkout the repo 
         uses: actions/checkout@v2
         
-      - name: Build container image
-        run: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+      # - name: Build container image
+      #   run: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+
+      - name: Build image infocoin-app
+        run: docker build . --file Dockerfile.app --tag $(echo $IMAGE_INFOCOIN_APP) --label "runnumber=${GITHUB_RUN_ID}"
+
+      - name: Build image infocoin-cron
+        run: docker build . --file Dockerfile.cron --tag $(echo $IMAGE_INFOCOIN_CRON) --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2

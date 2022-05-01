@@ -1,5 +1,5 @@
 #Creates a layer from node:alpine image.
-FROM node:alpine as infocoin-app
+FROM node:alpine
 
 #Creates directories
 RUN mkdir -p /usr/src/app
@@ -26,20 +26,3 @@ RUN npx prisma generate && npm run build
 EXPOSE 3000
 
 ENTRYPOINT ["npm", "run"]
-
-FROM ubuntu:latest as infocoin-cron
-
-RUN apt-get update && apt-get -y install cron curl 
-
-WORKDIR /app
-
-COPY crontab /etc/cron.d/crontab
-
-COPY crontab.sh /app/crontab.sh
-
-RUN chmod 0644 /etc/cron.d/crontab
-
-RUN /usr/bin/crontab /etc/cron.d/crontab
-
-# run crond as main process of container
-CMD ["cron", "-f"]
