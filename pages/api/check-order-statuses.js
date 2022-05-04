@@ -1,10 +1,36 @@
 import { STABLE_COIN } from '../../utils/constants';
 import { getTimestamp, getSignature, getHeaders } from '../../utils/api';
 import { ApiResponseError, ApiResponseSuccess } from '../../utils/responses';
-import { orderStatuses, orderPartStatuses } from '../../utils/constants';
+import {
+  orderStatuses,
+  orderPartStatuses,
+  orderSides,
+} from '../../utils/constants';
 import { localhostRequestGuardHof } from '../../utils/guards';
 import { postMessageToTelegram } from '../../services/telegram';
 import prisma from '../../lib/prisma';
+
+const updateOrderPartStatus = async (id, status) => {
+  await prisma.orderPart.update({
+    where: {
+      id,
+    },
+    data: {
+      status,
+    },
+  });
+};
+
+const updateOrderStatus = async (id, status) => {
+  await prisma.order.update({
+    where: {
+      id,
+    },
+    data: {
+      status,
+    },
+  });
+};
 
 export const getOpenBinanceOrders = async (symbol) => {
   const timestamp = getTimestamp();
@@ -39,8 +65,8 @@ const getAllTokens = async () => {
             },
           },
         },
-      }
-    }
+      },
+    },
   });
 
   return coins;
@@ -61,28 +87,58 @@ const fetchOrderByClientOrderId = async (symbol, clientOrderId) => {
   return orders;
 };
 
-const closeOrders = (tokens, binanceOrders) => {
+const precessClosedOrder = async (coin, orderId, orderPartId) => {
+  const order = await fetchOrderByClientOrderId(coin, clientOrderId);
+
+  if (order.status === orderPartStatuses.canceled) {
+    // TODO: need to decide what i need todo when user close order on Binance side
+    await postMessageToTelegram(
+      `Order for coin ${coin} was closed and deleted from the infocoin system!`,
+    );
+  }
+
+  if (
+    order.status === orderPartStatuses.filled &&
+    order.side === orderSides.buy
+  ) {
+    await Promise.all([
+      updateOrderStatus(orderId, orderStatuses.buyDone),
+      updateOrderPartStatus(orderPartId, orderPartStatuses.filled),
+      postMessageToTelegram(`Was buy ${order.origQty} ${coin}`),
+    ]);
+  }
+
+  if (
+    order.status === orderPartStatuses.filled &&
+    order.side === orderSides.sell
+  ) {
+    await Promise.all([
+      updateOrderStatus(orderId, orderStatuses.sellDone),
+      updateOrderPartStatus(orderPartId, orderPartStatuses.filled),
+      postMessageToTelegram(`Was sell ${order.origQty} ${coin}`),
+    ]);
+  }
+};
+
+const closeOrders = async (tokens, binanceOrders) => {
+  const ordersWillDone = [];
+
   tokens.forEach(({ coin, orders }) => {
-    orders.forEach(({ orderParts }) => {
-      orderParts.forEach(async (orderPart) => {
+    orders.forEach((order) => {
+      order.orderParts.forEach((orderPart) => {
         const orderInProgress = binanceOrders.find(
-          (binanceOrder) => orderPart.clientOrderId === binanceOrder.clientOrderId,
+          (binanceOrder) =>
+            orderPart.clientOrderId === binanceOrder.clientOrderId,
         );
 
         if (!orderInProgress) {
-          // order it's a variable consist closed or filled order
-          const order = await fetchOrderByClientOrderId(
-            coin, 
-            orderPart.clientOrderId,
-          );
-
-          await postMessageToTelegram(`Order type ${order.type} of symbol ${order.symbol} was closed with status ${order.status}.`);
-
-          console.log('WAS CLOSED!', order);
+          ordersWillDone.push(precessClosedOrder(coin, order.id, orderPart.id));
         }
-      })
-    })
-  })
+      });
+    });
+  });
+
+  await Promise.all(ordersWillDone);
 };
 
 async function handler(req, res) {
@@ -90,7 +146,7 @@ async function handler(req, res) {
     const binanceOpenOrders = await getOpenBinanceOrders();
     const tokens = await getAllTokens();
 
-    closeOrders(tokens, binanceOpenOrders);
+    await closeOrders(tokens, binanceOpenOrders);
 
     res.status(200).json(new ApiResponseSuccess(200, {}));
   } catch (e) {
@@ -98,15 +154,6 @@ async function handler(req, res) {
   } finally {
     console.log('check-order-statuses');
   }
-
-  /*
-    1) + Get my BUY_IN_PROGRESS, SELL_IN_PROGRESS orders
-    2) + Get all open order from binance
-    3) Close all local order parts which don't match with open orders
-    4) Mark tile that was close sell or buy
-    5) Change order status
-    6) Send telegram message
-  */
 }
 
 export default localhostRequestGuardHof(handler);
