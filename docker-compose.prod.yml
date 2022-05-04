@@ -1,19 +1,6 @@
 version: '3.8'
 services:
 
-  db:
-    image: postgres:13-alpine
-    restart: always
-    container_name: db
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - ${POSTGRES_PORT}:5432
-    volumes:
-      - db:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/10-init.sql
-
   cron:
     container_name: cron
     image: cron
@@ -24,7 +11,3 @@ services:
 
   infocoin:
     command: start
-
-volumes:
-  db:
-    driver: local
