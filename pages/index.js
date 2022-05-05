@@ -73,10 +73,14 @@ export default function Home() {
                   <p className='text-xs text-slate-400 mb-4'>
                     {userCoin.fullCoinName}
                   </p>
-                  <span className='flex h-3 w-3 absolute right-4 top-4'>
-                    <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'></span>
-                    <span className='relative inline-flex rounded-full h-3 w-3 bg-green-500'></span>
-                  </span>
+                  {
+                    userCoin.wasUpdated ? (
+                      <span className='flex h-3 w-3 absolute right-4 top-4'>
+                        <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'></span>
+                        <span className='relative inline-flex rounded-full h-3 w-3 bg-green-500'></span>
+                      </span>
+                    ) : null
+                  }
                   <Link href={`/${userCoin.id}`}>
                     <a className='text-xs border-2 hover:border-blue-600 hover:text-blue-600 border-blue-500 text-blue-500 font-bold px-2 py-2 inline-block rounded-md'>
                       Manage

@@ -20,6 +20,17 @@ async function handler(req, res) {
     },
   });
 
+  if (coin.wasUpdated) {
+    await prisma.coin.update({
+      where: {
+        id: coin.id
+      },
+      data: {
+        wasUpdated: false,
+      },
+    });
+  }
+
   res
     .status(200)
     .json(new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, { coin }));

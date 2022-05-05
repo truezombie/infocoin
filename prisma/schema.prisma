@@ -20,6 +20,7 @@ model User {
 model Coin {
   id           String  @id @default(cuid())
   coin         String  @unique
+  wasUpdated   Boolean @default(false)
   fullCoinName String
   // amount       Float
   orders       Order[]

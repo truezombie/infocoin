@@ -32,6 +32,17 @@ const updateOrderStatus = async (id, status) => {
   });
 };
 
+const markUpdatedCoin = async (coin) => {
+  await prisma.coin.update({
+    where: {
+      coin,
+    },
+    data: {
+      wasUpdated: true
+    },
+  });
+}
+
 export const getOpenBinanceOrders = async (symbol) => {
   const timestamp = getTimestamp();
   const currentSymbol = symbol ? `symbol=${symbol}${STABLE_COIN}` : '';
@@ -102,6 +113,7 @@ const precessClosedOrder = async (coin, orderId, orderPartId) => {
     order.side === orderSides.buy
   ) {
     await Promise.all([
+      markUpdatedCoin(coin),
       updateOrderStatus(orderId, orderStatuses.buyDone),
       updateOrderPartStatus(orderPartId, orderPartStatuses.filled),
       postMessageToTelegram(`Was buy ${order.origQty} ${coin}`),
@@ -113,6 +125,7 @@ const precessClosedOrder = async (coin, orderId, orderPartId) => {
     order.side === orderSides.sell
   ) {
     await Promise.all([
+      markUpdatedCoin(coin),
       updateOrderStatus(orderId, orderStatuses.sellDone),
       updateOrderPartStatus(orderPartId, orderPartStatuses.filled),
       postMessageToTelegram(`Was sell ${order.origQty} ${coin}`),
