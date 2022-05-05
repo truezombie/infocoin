@@ -42,4 +42,3 @@ jobs:
             docker compose -f docker-compose.yml -f docker-compose.prod.yml down
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
             docker network connect infocoin infocoin
-            docker network connect infocoin db
