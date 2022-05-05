@@ -139,7 +139,7 @@ export default function Coin() {
           <FullBlockMessage text='No data found' />
         ) : null}
 
-        <div className='overflow-auto'>
+        <div className='overflow-auto w-full'>
           {!transactionsIsLoading && data && data?.coin.orders.length !== 0 ? (
             <table className='table-auto'>
               <thead>
