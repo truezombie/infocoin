@@ -142,6 +142,8 @@ const closeOrders = async (tokens, binanceOrders) => {
 };
 
 async function handler(req, res) {
+  await postMessageToTelegram(`lol`);
+
   try {
     const binanceOpenOrders = await getOpenBinanceOrders();
     const tokens = await getAllTokens();
