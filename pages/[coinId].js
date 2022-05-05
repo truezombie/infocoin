@@ -139,93 +139,95 @@ export default function Coin() {
           <FullBlockMessage text='No data found' />
         ) : null}
 
-        {!transactionsIsLoading && data && data?.coin.orders.length !== 0 ? (
-          <table className='table-auto'>
-            <thead>
-              <tr>
-                <th className='bg-white p-2 text-left text-sm border-b-2 border-r rounded-tl-md'>
-                  Order status
-                </th>
-                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
-                  Data
-                </th>
-                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
-                  {data.coin.coin} amount
-                </th>
-                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
-                  Price $
-                </th>
-                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
-                  Price for 1 {data.coin.coin}
-                </th>
-                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
-                  Order part status
-                </th>
-                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
-                  Order type
-                </th>
-                <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
-                  Order side
-                </th>
-                <th className='bg-white p-2 text-left text-sm border-b-2 rounded-tr-md'></th>
-              </tr>
-            </thead>
+        <div className='overflow-auto'>
+          {!transactionsIsLoading && data && data?.coin.orders.length !== 0 ? (
+            <table className='table-auto'>
+              <thead>
+                <tr>
+                  <th className='bg-white p-2 text-left text-sm border-b-2 border-r rounded-tl-md'>
+                    Order status
+                  </th>
+                  <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
+                    Data
+                  </th>
+                  <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
+                    {data.coin.coin} amount
+                  </th>
+                  <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
+                    Price $
+                  </th>
+                  <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
+                    Price for 1 {data.coin.coin}
+                  </th>
+                  <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
+                    Order part status
+                  </th>
+                  <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
+                    Order type
+                  </th>
+                  <th className='bg-white p-2 text-left text-sm border-b-2 border-r'>
+                    Order side
+                  </th>
+                  <th className='bg-white p-2 text-left text-sm border-b-2 rounded-tr-md'></th>
+                </tr>
+              </thead>
 
-            <tbody>
-              {data?.coin.orders.map((order, transactionIndex) => (
-                <Fragment key={order.id}>
-                  {order?.orderParts.length !== 0
-                    ? order?.orderParts.map((orderPart, index) => {
-                        return (
-                          <tr
-                            key={orderPart.id}
-                            className={
-                              transactionIndex % 2 === 0
-                                ? 'bg-white'
-                                : 'bg-gray-50'
-                            }
-                          >
-                            {index === 0 ? (
-                              <td
-                                rowSpan={order.orderParts.length}
-                                className='p-2 border-r border-b text-xs'
-                              >
-                                {getOrderStatusLabel(order.status)}
+              <tbody>
+                {data?.coin.orders.map((order, transactionIndex) => (
+                  <Fragment key={order.id}>
+                    {order?.orderParts.length !== 0
+                      ? order?.orderParts.map((orderPart, index) => {
+                          return (
+                            <tr
+                              key={orderPart.id}
+                              className={
+                                transactionIndex % 2 === 0
+                                  ? 'bg-white'
+                                  : 'bg-gray-50'
+                              }
+                            >
+                              {index === 0 ? (
+                                <td
+                                  rowSpan={order.orderParts.length}
+                                  className='p-2 border-r border-b text-xs'
+                                >
+                                  {getOrderStatusLabel(order.status)}
+                                </td>
+                              ) : null}
+                              <td className='p-2 border-b border-r text-xs'>
+                                {getDateFromTimestamp(orderPart.transactTime)}
                               </td>
-                            ) : null}
-                            <td className='p-2 border-b border-r text-xs'>
-                              {getDateFromTimestamp(orderPart.transactTime)}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {orderPart.coinsAmount}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {orderPart.fullPrice}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {orderPart.oneCoinPrice}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {getOrderPartStatusLabel(orderPart.status)}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {getOrderTypeLabel(orderPart.type)}
-                            </td>
-                            <td className='p-2 border-b border-r text-xs'>
-                              {getOrderSideLabel(orderPart.side)}
-                            </td>
-                            <td className='p-2 border-l border-b text-xs'>
-                              {getOrderPartActionButton(order, orderPart)}
-                            </td>
-                          </tr>
-                        );
-                      })
-                    : null}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
-        ) : null}
+                              <td className='p-2 border-b border-r text-xs'>
+                                {orderPart.coinsAmount}
+                              </td>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {orderPart.fullPrice}
+                              </td>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {orderPart.oneCoinPrice}
+                              </td>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {getOrderPartStatusLabel(orderPart.status)}
+                              </td>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {getOrderTypeLabel(orderPart.type)}
+                              </td>
+                              <td className='p-2 border-b border-r text-xs'>
+                                {getOrderSideLabel(orderPart.side)}
+                              </td>
+                              <td className='p-2 border-l border-b text-xs'>
+                                {getOrderPartActionButton(order, orderPart)}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      : null}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          ) : null}
+        </div>
       </main>
       <ModalWindow isOpen={closeOrderModalWindowIsOpen} msgTitle='Close order'>
         <>
