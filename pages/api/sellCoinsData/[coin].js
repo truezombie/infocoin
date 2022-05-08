@@ -8,7 +8,7 @@ import {
 } from '../../../utils/responses';
 
 const getAveragePrices = async (symbol) => {
-  const interval = '15m'
+  const interval = '5m'
   const currentSymbol = symbol ? `symbol=${symbol}${STABLE_COIN}` : '';
 
   const candlesRaw = await fetch(

@@ -141,7 +141,7 @@ export default function Coin() {
 
         <div className='overflow-auto w-full'>
           {!transactionsIsLoading && data && data?.coin.orders.length !== 0 ? (
-            <table className='table-auto'>
+            <table className='table-auto w-full'>
               <thead>
                 <tr>
                   <th className='bg-white p-2 text-left text-sm border-b-2 border-r rounded-tl-md'>
