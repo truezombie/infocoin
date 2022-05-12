@@ -97,6 +97,7 @@ export const ModalWindowBodyFirstBuyCoins = ({
       body: JSON.stringify({
         symbol: coin,
         side: orderSides.buy,
+        isLimitOrder,
         type: isLimitOrder ? orderTypes.limit : orderTypes.market,
         ...(isLimitOrder
           ? {

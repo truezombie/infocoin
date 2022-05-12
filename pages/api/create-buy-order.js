@@ -78,7 +78,7 @@ export async function createBinanceOrder(symbol, side, type, quantity, price) {
 }
 
 async function handler(req, res) {
-  const { symbol, side, type, quantity, price } = req.body;
+  const { symbol, side, type, quantity, price, isLimitOrder } = req.body;
 
   try {
     const binanceCreateOrder = await createBinanceOrder(symbol, side, type, quantity, price);
@@ -132,6 +132,7 @@ async function handler(req, res) {
       .status(200)
       .json(new ApiResponseSuccess(RESPONSE_STATUSES.SUCCESS, order));
   } catch (e) {
+    console.log(e);
     res.status(500).json(new ApiResponseError());
   }
 }
