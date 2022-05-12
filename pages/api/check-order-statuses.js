@@ -21,7 +21,7 @@ const updateOrderPartStatus = async (id, status) => {
   });
 };
 
-const updateOrderStatus = async (id, status) => {
+export const updateOrderStatus = async (id, status) => {
   await prisma.order.update({
     where: {
       id,
@@ -98,7 +98,7 @@ const fetchOrderByClientOrderId = async (symbol, clientOrderId) => {
   return orders;
 };
 
-const precessClosedOrder = async (coin, orderId, orderPartId) => {
+const precessClosedOrder = async (coin, orderId, orderPartId, clientOrderId) => {
   const order = await fetchOrderByClientOrderId(coin, clientOrderId);
 
   if (order.status === orderPartStatuses.canceled) {
@@ -145,7 +145,7 @@ const closeOrders = async (tokens, binanceOrders) => {
         );
 
         if (!orderInProgress) {
-          ordersWillDone.push(precessClosedOrder(coin, order.id, orderPart.id));
+          ordersWillDone.push(precessClosedOrder(coin, order.id, orderPart.id, orderPart.clientOrderId));
         }
       });
     });
@@ -163,6 +163,7 @@ async function handler(req, res) {
 
     res.status(200).json(new ApiResponseSuccess(200, {}));
   } catch (e) {
+    console.log(e);
     res.status(500).send(new ApiResponseError());
   } finally {
     console.log('check-order-statuses');

@@ -253,6 +253,7 @@ export default function Coin() {
       >
         <ModalWindowBodySellCoins
           coin={data?.coin.coin}
+          orderId={sellTokensModalWindowIsOpen.data?.orderId}
           oneCoinPrice={Number(sellTokensModalWindowIsOpen.data?.oneCoinPrice)}
           orderPrice={Number(sellTokensModalWindowIsOpen.data?.fullPrice)}
           coinsAmount={Number(sellTokensModalWindowIsOpen.data?.coinsAmount)}

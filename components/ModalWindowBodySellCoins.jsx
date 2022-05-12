@@ -9,6 +9,7 @@ import { useRequestManager } from '../hooks/useResponseChecker';
 
 export const ModalWindowBodySellCoins = ({
   coin,
+  orderId,
   oneCoinPrice,
   orderPrice,
   coinsAmount,
@@ -55,6 +56,7 @@ export const ModalWindowBodySellCoins = ({
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        orderId,
         symbol: coin,
         side: orderSides.sell,
         type: orderTypes.limit,
@@ -209,4 +211,5 @@ ModalWindowBodySellCoins.propTypes = {
   coin: PropTypes.string,
   msgBtnApply: PropTypes.string,
   msgBtnClose: PropTypes.string,
+  orderId: PropTypes.string,
 };
